@@ -104,7 +104,8 @@ function MapFocusHandler({ gameMode, continent, gameState, targetCenter }) {
 
     if (gameState === 'revealed' || gameState === 'gameover' || gameState === 'victory') {
       if (targetCenter) {
-        map.flyTo(targetCenter, 5, { duration: 1.5 });
+        // Zoom seviyesi 5'ten 3.5'e düşürülerek daha geniş (az zoom'lu) bir görünüm sağlandı
+        map.flyTo(targetCenter, 3.5, { duration: 1.5 });
       }
     } else if (gameMode === 'relax' && CONTINENT_BOUNDS[continent]) {
       const { center, zoom } = CONTINENT_BOUNDS[continent];
