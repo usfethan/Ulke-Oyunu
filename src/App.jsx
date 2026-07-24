@@ -109,14 +109,14 @@ function MapFocusHandler({ gameMode, continent, gameState, targetCenter }) {
   useEffect(() => {
     setTimeout(() => { map.invalidateSize(); }, 150);
 
-    if (gameState === 'revealed' && targetCenter) {
-      map.flyTo(targetCenter, 5, { duration: 1.5 });
-    } else if (gameState === 'playing' && targetCenter) {
-      map.flyTo(targetCenter, 4, { duration: 1.2 });
+    if (gameState === 'revealed' || gameState === 'gameover' || gameState === 'victory') {
+      if (targetCenter) {
+        map.flyTo(targetCenter, 5, { duration: 1.5 });
+      }
     } else if (gameMode === 'relax' && CONTINENT_BOUNDS[continent]) {
       const { center, zoom } = CONTINENT_BOUNDS[continent];
       map.setView(center, zoom, { animate: true, duration: 1 });
-    } else if (gameState === 'playing' && gameMode === 'challenge' && !targetCenter) {
+    } else if (gameState === 'playing' && gameMode === 'challenge') {
       map.setView([20, 0], 2, { animate: true, duration: 1 });
     }
   }, [map, gameMode, continent, gameState, targetCenter]);
