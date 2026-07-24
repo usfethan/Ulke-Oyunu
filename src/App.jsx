@@ -36,7 +36,6 @@ const CONTINENT_BOUNDS = {
 };
 
 const COUNTRY_DETAILS = {
-  // --- TIER 1 (Kolay) ---
   "United States": { code: "us", capital: "Washington, D.C.", continent: "Americas", tier: 1 },
   "Canada": { code: "ca", capital: "Ottawa", continent: "Americas", tier: 1 },
   "Brazil": { code: "br", capital: "Brasília", continent: "Americas", tier: 1 },
@@ -52,8 +51,6 @@ const COUNTRY_DETAILS = {
   "Egypt": { code: "eg", capital: "Cairo", continent: "Africa", tier: 1 },
   "Turkey": { code: "tr", capital: "Ankara", continent: "Asia-Pacific", tier: 1 },
   "Argentina": { code: "ar", capital: "Buenos Aires", continent: "Americas", tier: 1 },
-
-  // --- TIER 2 (Orta) ---
   "Spain": { code: "es", capital: "Madrid", continent: "Europe", tier: 2 },
   "Mexico": { code: "mx", capital: "Mexico City", continent: "Americas", tier: 2 },
   "South Africa": { code: "za", capital: "Pretoria", continent: "Africa", tier: 2 },
@@ -70,8 +67,6 @@ const COUNTRY_DETAILS = {
   "Nigeria": { code: "ng", capital: "Abuja", continent: "Africa", tier: 2 },
   "Algeria": { code: "dz", capital: "Algiers", continent: "Africa", tier: 2 },
   "Chile": { code: "cl", capital: "Santiago", continent: "Americas", tier: 2 },
-
-  // --- TIER 3 (Zor) ---
   "Palestine": { code: "ps", capital: "Jerusalem", continent: "Asia-Pacific", tier: 3 },
   "Nicaragua": { code: "ni", capital: "Managua", continent: "Americas", tier: 3 },
   "Peru": { code: "pe", capital: "Lima", continent: "Americas", tier: 3 },
@@ -91,8 +86,6 @@ const COUNTRY_DETAILS = {
   "Kenya": { code: "ke", capital: "Nairobi", continent: "Africa", tier: 3 },
   "Ethiopia": { code: "et", capital: "Addis Ababa", continent: "Africa", tier: 3 },
   "New Zealand": { code: "nz", capital: "Wellington", continent: "Asia-Pacific", tier: 3 },
-
-  // --- TIER 4 (Çok Zor) ---
   "Bolivia": { code: "bo", capital: "Sucre", continent: "Americas", tier: 4 },
   "Paraguay": { code: "py", capital: "Asunción", continent: "Americas", tier: 4 },
   "Uruguay": { code: "uy", capital: "Montevideo", continent: "Americas", tier: 4 },
@@ -164,6 +157,11 @@ export default function App() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const askedCountriesRef = useRef([]);
+  // FIX: Her render döngüsünde targetCountry değerini güncel tutmak için ref kullanıyoruz
+  const targetCountryRef = useRef(null);
+  useEffect(() => {
+    targetCountryRef.current = targetCountry;
+  }, [targetCountry]);
 
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
@@ -381,23 +379,30 @@ export default function App() {
     const name = feature.properties.name;
     const details = COUNTRY_DETAILS[name];
 
+    const baseStyle = {
+      weight: 1,
+      color: '#475569',
+      fillOpacity: 0.3,
+      className: 'leaflet-interactive pointer-events-auto'
+    };
+
     if (correctCountries[name]) {
-      return { fillColor: '#10b981', fillOpacity: 0.8, weight: 1.5, color: '#34d399' };
+      return { ...baseStyle, fillColor: '#10b981', fillOpacity: 0.8, weight: 1.5, color: '#34d399' };
     }
 
     if (gameState === 'revealed' && name?.toLowerCase() === targetCountry?.toLowerCase()) {
-      return { fillColor: '#ef4444', fillOpacity: 0.9, weight: 2.5, color: '#fef08a' };
+      return { ...baseStyle, fillColor: '#ef4444', fillOpacity: 0.9, weight: 2.5, color: '#fef08a' };
     }
 
     if (highlightedContinent) {
       if (details && details.continent === highlightedContinent) {
-        return { fillColor: '#0284c7', fillOpacity: 0.5, weight: 2, color: '#38bdf8' };
+        return { ...baseStyle, fillColor: '#0284c7', fillOpacity: 0.5, weight: 2, color: '#38bdf8' };
       } else {
-        return { fillColor: '#0f172a', fillOpacity: 0.1, weight: 0.5, color: '#334155' };
+        return { ...baseStyle, fillColor: '#0f172a', fillOpacity: 0.1, weight: 0.5, color: '#334155' };
       }
     }
 
-    return { fillColor: '#1e293b', weight: 1, color: '#475569', fillOpacity: 0.3 };
+    return { ...baseStyle, fillColor: '#1e293b' };
   };
 
   const totalCountries = getTotalCountForMode();
@@ -549,13 +554,26 @@ export default function App() {
           <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png" maxZoom={19} />
           {countriesData && (
             <GeoJSON
+              key={targetCountry}
               data={countriesData}
               style={getCountryStyle}
               onEachFeature={(feature, layer) => {
                 layer.on({
-                  click: () => {
+                  mousedown: (e) => {
+                    L.DomEvent.stopPropagation(e);
+                  },
+                  touchstart: (e) => {
+                    L.DomEvent.stopPropagation(e);
+                  },
+                  click: (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    L.DomEvent.preventDefault(e);
+
                     const clickedName = feature.properties.name;
-                    if (clickedName?.toLowerCase() === targetCountry?.toLowerCase()) {
+                    // FIX: Closure (eski state) sorununu önlemek için güncel targetCountry değerini ref üzerinden okuyoruz
+                    const currentTarget = targetCountryRef.current;
+
+                    if (clickedName?.toLowerCase() === currentTarget?.toLowerCase()) {
                       handleCorrectAnswer(feature);
                     } else {
                       handleWrongClick(clickedName);
@@ -622,7 +640,7 @@ export default function App() {
                   disabled={scoreSaved}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
                 />
-                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs">
+                <button onClick5={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs">
                   {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 💾'}
                 </button>
                 <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700">
