@@ -546,7 +546,7 @@ export default function App() {
         )}
 
         <MapContainer center={[20, 0]} zoom={2} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%', background: '#090d16' }}>
-          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" maxZoom={19} />
+          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png" maxZoom={19} />
           {countriesData && (
             <GeoJSON
               data={countriesData}
