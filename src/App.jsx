@@ -157,7 +157,6 @@ export default function App() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const askedCountriesRef = useRef([]);
-  // FIX: Her render döngüsünde targetCountry değerini güncel tutmak için ref kullanıyoruz
   const targetCountryRef = useRef(null);
   useEffect(() => {
     targetCountryRef.current = targetCountry;
@@ -570,7 +569,6 @@ export default function App() {
                     L.DomEvent.preventDefault(e);
 
                     const clickedName = feature.properties.name;
-                    // FIX: Closure (eski state) sorununu önlemek için güncel targetCountry değerini ref üzerinden okuyoruz
                     const currentTarget = targetCountryRef.current;
 
                     if (clickedName?.toLowerCase() === currentTarget?.toLowerCase()) {
@@ -587,66 +585,92 @@ export default function App() {
         </MapContainer>
 
         {gameState === 'gameover' && (
-          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
-            <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl">
-              <div className="text-4xl mb-2">💀</div>
-              <h3 className="text-lg font-black text-rose-400 mb-1">GAME OVER</h3>
-              <p className="text-xs text-slate-300 mb-4">Target was: <span className="font-bold text-yellow-400">{targetCountry}</span></p>
-              <div className="bg-slate-800 p-3 rounded-2xl mb-6 border border-slate-700">
-                <span className="text-[10px] text-slate-400 block">FINAL SCORE</span>
-                <span className="text-xl font-black text-emerald-400">{score} PTS</span>
+          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-rose-500/45 rounded-3xl p-5 w-full max-w-xs text-center shadow-2xl flex flex-col max-h-[85vh]">
+              <div className="text-3xl mb-1">💔</div>
+              <h3 className="text-base font-black text-rose-400 mb-0.5">GAME OVER</h3>
+              <p className="text-[11px] text-slate-300 mb-3">Target was <span className="font-bold text-yellow-400">{targetCountry}</span></p>
+              
+              <div className="grid grid-cols-3 gap-2 bg-slate-950/60 p-2.5 rounded-2xl mb-3 border border-slate-800">
+                <div>
+                  <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
+                  <span className="text-xs font-black text-emerald-400">{score}</span>
+                </div>
+                <div>
+                  <span className="text-[8px] text-slate-400 block font-semibold">LEVEL</span>
+                  <span className="text-xs font-black text-amber-400">{level}</span>
+                </div>
+                <div>
+                  <span className="text-[8px] text-slate-400 block font-semibold">BEST</span>
+                  <span className="text-xs font-black text-sky-400">{highScore}</span>
+                </div>
               </div>
-              <div className="flex flex-col gap-2.5">
+
+              <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar pr-0.5">
                 <input
                   type="text"
-                  placeholder="Enter your name..."
+                  placeholder="Enter your name"
                   value={playerNameInput}
                   onChange={(e) => setPlayerNameInput(e.target.value)}
                   maxLength={12}
                   disabled={scoreSaved}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
                 />
-                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs">
-                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 💾'}
+                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
+                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
                 </button>
-                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700">
+                <button onClick={() => setGameState('revealed')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 text-xs transition">
+                  SHOW LOCATION 📍
+                </button>
+                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition">
                   PLAY AGAIN 🔄
                 </button>
-                <button onClick={() => setScreen('menu')} className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 font-bold rounded-xl text-xs">
-                  MAIN MENU 🏠
+                <button onClick={() => setScreen('leaderboard')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-slate-700 transition">
+                  LEADERBOARD 👑
                 </button>
               </div>
             </div>
           </div>
         )}
 
+        {gameState === 'revealed' && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-slate-900/95 border border-slate-700 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md">
+            <span className="text-xs text-slate-300">Viewing location of <strong className="text-yellow-400">{targetCountry}</strong></span>
+            <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
+              Play Again 🔄
+            </button>
+          </div>
+        )}
+
         {gameState === 'victory' && (
-          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
-            <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl">
-              <div className="text-4xl mb-2">👑</div>
-              <h3 className="text-lg font-black text-amber-400 mb-1">VICTORY!</h3>
-              <p className="text-xs text-slate-300 mb-4">You completed the entire map!</p>
-              <div className="bg-slate-800 p-3 rounded-2xl mb-6 border border-slate-700">
-                <span className="text-[10px] text-slate-400 block">TOTAL SCORE</span>
-                <span className="text-xl font-black text-emerald-400">{score} PTS</span>
+          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-5 w-full max-w-xs text-center shadow-2xl flex flex-col max-h-[85vh]">
+              <div className="text-3xl mb-1">👑</div>
+              <h3 className="text-base font-black text-amber-400 mb-0.5">VICTORY!</h3>
+              <p className="text-[11px] text-slate-300 mb-3">You completed the map!</p>
+              
+              <div className="bg-slate-950/60 p-3 rounded-2xl mb-3 border border-slate-800">
+                <span className="text-[8px] text-slate-400 block font-semibold">TOTAL SCORE</span>
+                <span className="text-lg font-black text-emerald-400">{score} PTS</span>
               </div>
-              <div className="flex flex-col gap-2.5">
+
+              <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar pr-0.5">
                 <input
                   type="text"
-                  placeholder="Enter your name..."
+                  placeholder="Enter your name"
                   value={playerNameInput}
                   onChange={(e) => setPlayerNameInput(e.target.value)}
                   maxLength={12}
                   disabled={scoreSaved}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
                 />
-                <button onClick5={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs">
-                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 💾'}
+                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
+                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
                 </button>
-                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700">
+                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700 transition">
                   PLAY AGAIN 🔄
                 </button>
-                <button onClick={() => setScreen('menu')} className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 font-bold rounded-xl text-xs">
+                <button onClick={() => setScreen('menu')} className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 font-bold rounded-xl text-xs transition">
                   MAIN MENU 🏠
                 </button>
               </div>
