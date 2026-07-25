@@ -669,7 +669,7 @@ export default function App() {
               onClick={() => setShowRelaxHintModal(true)} 
               className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-sky-300 transition flex items-center gap-2 animate-pulse"
             >
-              <span className="text-base">💡</span> Neresi? (İpucu)
+              <span className="text-base">💡</span> Where is it? (Hint)
             </button>
           </div>
         )}
