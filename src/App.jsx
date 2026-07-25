@@ -429,10 +429,29 @@ export default function App() {
     setTimeout(() => {
       setIsAdPlaying(false);
       setShowRelaxHintModal(false);
+      
+      // Doğru ülkeyi bul ve seç (haritada doğru cevap olarak işaretle / otomatik doğru yap veya hedefi göster)
+      if (countriesData && countriesData.features && targetCountry) {
+        const targetFeature = countriesData.features.find(f => f.properties.name.toLowerCase() === targetCountry.toLowerCase());
+        if (targetFeature && mapInstanceRef.current) {
+          try {
+            const layer = L.geoJSON(targetFeature);
+            const b = layer.getBounds();
+            const c = b.getCenter();
+            const centerPoint = targetCountry === "Russia" ? [61, 105] : [c.lat, c.lng];
+            
+            // Hem zoom yap hem de ülkeyi doğru kabul et (seçilmiş/bulunmuş olsun)
+            mapInstanceRef.current.flyTo(centerPoint, 4, { duration: 1.5 });
+            handleCorrectAnswer(targetFeature, layer);
+            return;
+          } catch (e) {}
+        }
+      }
+
       if (targetCenter && mapInstanceRef.current) {
         mapInstanceRef.current.flyTo(targetCenter, 4, { duration: 1.5 });
       }
-      setToastMessage(`💡 Focused on ${targetCountry}!`);
+      setToastMessage(`💡 ${targetCountry} seçildi ve gösterildi!`);
       setTimeout(() => setToastMessage(null), 2000);
     }, 1500);
   };
@@ -669,7 +688,7 @@ export default function App() {
               onClick={() => setShowRelaxHintModal(true)} 
               className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-sky-300 transition flex items-center gap-2 animate-pulse"
             >
-              <span className="text-base">💡</span> Where is it? (Hint)
+              <span className="text-base">💡</span> Neresi? (İpucu)
             </button>
           </div>
         )}
@@ -734,9 +753,9 @@ export default function App() {
               </button>
 
               <div className="text-3xl mb-2">🎬</div>
-              <h3 className="text-base font-black text-emerald-400 mb-1">CONTINUE GAME?</h3>
+              <h3 className="text-base font-black text-emerald-400 mb-1">DEVAM ETMEK İSTER MİSİN?</h3>
               <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch a short ad to get <strong className="text-emerald-400">+3 Lives</strong> and keep your score and level going!
+                Kısa bir reklam izleyerek <strong className="text-emerald-400">+3 Can</strong> kazan ve skoruna kaldığın yerden devam et!
               </p>
 
               <button 
@@ -744,7 +763,7 @@ export default function App() {
                 disabled={isAdPlaying}
                 className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & GET +3 LIVES 🚀'}
+                {isAdPlaying ? 'REKLAM OYNATILIYOR...' : 'REKLAMI İZLE & +3 CAN AL 🚀'}
               </button>
             </div>
           </div>
@@ -761,9 +780,9 @@ export default function App() {
               </button>
 
               <div className="text-3xl mb-2">💡</div>
-              <h3 className="text-base font-black text-sky-400 mb-1">NEED A HINT?</h3>
+              <h3 className="text-base font-black text-sky-400 mb-1">İPUCU İSTER MİSİN?</h3>
               <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch a short ad to automatically center and focus the map on <strong className="text-yellow-400">{targetCountry}</strong>!
+                Kısa bir reklam izleyerek hedefteki <strong className="text-yellow-400">{targetCountry}</strong> ülkesini otomatik olarak seçebilir ve haritada zoom yapabilirsin!
               </p>
 
               <button 
@@ -771,7 +790,7 @@ export default function App() {
                 disabled={isAdPlaying}
                 className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SHOW LOCATION 📍'}
+                {isAdPlaying ? 'REKLAM OYNATILIYOR...' : 'REKLAMI İZLE & ÜLKEYİ SEÇ 📍'}
               </button>
             </div>
           </div>
