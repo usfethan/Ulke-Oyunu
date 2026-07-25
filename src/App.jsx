@@ -243,10 +243,10 @@ export default function App() {
     setSelectedContinentFilter(continent);
     setScore(0);
     setLevel(1);
-    setCorrectCountries({});
+    setCorrectCountries({}); // Önceki oyundan kalan bayrakları tamamen temizler
     setScoreSaved(false);
     setShowAdModal(false);
-    askedCountriesRef.current = [];
+    askedCountriesRef.current = []; // Sorulan ülkeler geçmişini sıfırlar
     setQuestionLives(3);
     setScreen('game');
     pickNewTarget(null, mode, continent, 1);
@@ -323,7 +323,6 @@ export default function App() {
 
     setScore(newScore);
     
-    // Eğer seviye atlandıysa canları full'le (3 yap)
     if (newLevel > level) {
       setQuestionLives(3);
     }
@@ -336,11 +335,17 @@ export default function App() {
     }
 
     let centerPoint = targetCenter;
-    try {
-      const b = layerInstance.getBounds();
-      const c = b.getCenter();
-      centerPoint = [c.lat, c.lng];
-    } catch (e) {}
+    
+    // Rusya için özel merkez koordinat sabitlemesi (harita hatasını önlemek için)
+    if (countryName === "Russia") {
+      centerPoint = [61, 105];
+    } else {
+      try {
+        const b = layerInstance.getBounds();
+        const c = b.getCenter();
+        centerPoint = [c.lat, c.lng];
+      } catch (e) {}
+    }
 
     const code = getCountryCode(countryName);
     if (code && centerPoint && mapInstanceRef.current) {
