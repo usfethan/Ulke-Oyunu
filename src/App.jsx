@@ -104,7 +104,6 @@ function MapFocusHandler({ gameMode, continent, gameState, targetCenter }) {
 
     if (gameState === 'revealed' || gameState === 'gameover' || gameState === 'victory') {
       if (targetCenter) {
-        // Zoom seviyesi 5'ten 3.5'e düşürülerek daha geniş (az zoom'lu) bir görünüm sağlandı
         map.flyTo(targetCenter, 3.5, { duration: 1.5 });
       }
     } else if (gameMode === 'relax' && CONTINENT_BOUNDS[continent]) {
@@ -245,6 +244,7 @@ export default function App() {
     setCorrectCountries({});
     setScoreSaved(false);
     askedCountriesRef.current = [];
+    setQuestionLives(3); // Oyun başında canlar 3 olarak atanır
     setScreen('game');
     pickNewTarget(null, mode, continent, 1);
   };
@@ -295,7 +295,7 @@ export default function App() {
     } catch (e) {}
 
     setTargetCountry(newTarget);
-    setQuestionLives(3);
+    // BURADAKİ setQuestionLives(3) KALDIRILDI! Artık doğru bilince canlar sıfırlanmıyor, mevcut can korunuyor.
     
     if (mode === 'challenge') {
       const calculatedTime = Math.max(7, 21 - currentLevel * 2);
@@ -558,6 +558,26 @@ export default function App() {
               data={countriesData}
               style={getCountryStyle}
               onEachFeature={(feature, layer) => {
+                const countryName = feature.properties.name;
+
+                if (correctCountries[countryName]) {
+                  const countryCode = correctCountries[countryName].code;
+                  if (countryCode) {
+                    try {
+                      const center = layer.getBounds().getCenter();
+                      const flagIcon = L.divIcon({
+                        className: 'custom-flag-marker',
+                        html: `<div style="font-size: 20px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">
+                                 <img src="https://flagcdn.com/w40/${countryCode.toLowerCase()}.png" style="width: 24px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.4);" />
+                               </div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                      });
+                      L.marker([center.lat, center.lng], { icon: flagIcon, interactive: false }).addTo(layer._map);
+                    } catch (e) {}
+                  }
+                }
+
                 layer.on({
                   mousedown: (e) => {
                     L.DomEvent.stopPropagation(e);
@@ -669,10 +689,7 @@ export default function App() {
                   {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
                 </button>
                 <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700 transition">
-                  PLAY AGAIN 🔄
-                </button>
-                <button onClick={() => setScreen('menu')} className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-400 font-bold rounded-xl text-xs transition">
-                  MAIN MENU 🏠
+                  Play Again 🔄
                 </button>
               </div>
             </div>
