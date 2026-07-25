@@ -160,7 +160,7 @@ export default function App() {
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const markersRef = useRef([]); // Eklenen bayrak marker'larını takip etmek ve silmek için
+  const markersRef = useRef([]);
 
   useEffect(() => {
     targetCountryRef.current = targetCountry;
@@ -240,7 +240,6 @@ export default function App() {
   };
 
   const startGame = (mode, continent = 'Europe') => {
-    // Önceki oyundan kalan haritadaki tüm bayrak marker'larını temizle
     markersRef.current.forEach((m) => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.removeLayer(m);
@@ -609,6 +608,7 @@ export default function App() {
           zoom={2} 
           zoomControl={false} 
           scrollWheelZoom={true} 
+          attributionControl={false}
           style={{ width: '100%', height: '100%', background: '#090d16' }}
           ref={(map) => {
             if (map) mapInstanceRef.current = map;
