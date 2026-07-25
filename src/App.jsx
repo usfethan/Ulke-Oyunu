@@ -155,6 +155,7 @@ export default function App() {
 
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
+  const [showRelaxHintModal, setShowRelaxHintModal] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const askedCountriesRef = useRef([]);
@@ -206,7 +207,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showExitConfirm) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showRelaxHintModal || showExitConfirm) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -219,7 +220,7 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showExitConfirm]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showRelaxHintModal, showExitConfirm]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -254,6 +255,7 @@ export default function App() {
     setCorrectCountries({}); 
     setScoreSaved(false);
     setShowAdModal(false);
+    setShowRelaxHintModal(false);
     askedCountriesRef.current = []; 
     setQuestionLives(3);
     setScreen('game');
@@ -324,14 +326,15 @@ export default function App() {
     triggerHaptic('success');
 
     const countryName = countryFeature.properties.name;
-    const newScore = score + (questionLives * 10);
+    const ptsEarned = gameMode === 'relax' ? 10 : (questionLives * 10);
+    const newScore = score + ptsEarned;
     
     const nextCorrectCount = Object.keys(correctCountries).length + 1;
     const newLevel = Math.floor(nextCorrectCount / 5) + 1;
 
     setScore(newScore);
     
-    if (newLevel > level) {
+    if (newLevel > level && gameMode === 'challenge') {
       setQuestionLives(3);
     }
     
@@ -380,8 +383,8 @@ export default function App() {
       setScoreSaved(false);
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
     } else {
-      const levelUpText = newLevel > level ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
-      setToastMessage(`🎉 Correct! +${questionLives * 10} pts${levelUpText}`);
+      const levelUpText = (newLevel > level && gameMode === 'challenge') ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
+      setToastMessage(`🎉 Correct! +${ptsEarned} pts${levelUpText}`);
       confetti({ particleCount: 40, spread: 40, origin: { y: 0.7 } });
       
       setTimeout(() => {
@@ -419,6 +422,19 @@ export default function App() {
       setIsAdPlaying(false);
       setShowAdModal(false);
       setQuestionLives(3);
+    }, 1500);
+  };
+
+  const handleWatchRelaxHintAd = () => {
+    setIsAdPlaying(true);
+    setTimeout(() => {
+      setIsAdPlaying(false);
+      setShowRelaxHintModal(false);
+      if (targetCenter && mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo(targetCenter, 4, { duration: 1.5 });
+      }
+      setToastMessage(`💡 Focused on ${targetCountry}!`);
+      setTimeout(() => setToastMessage(null), 2000);
     }, 1500);
   };
 
@@ -593,6 +609,15 @@ export default function App() {
             <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
             <span className="text-xs font-bold text-emerald-400">{score}</span>
           </div>
+
+          {gameMode === 'relax' && (
+            <button 
+              onClick={() => setShowRelaxHintModal(true)} 
+              className="bg-sky-500/20 border border-sky-500/40 hover:bg-sky-500/30 text-sky-300 px-2 py-1.5 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1"
+            >
+              💡 Hint
+            </button>
+          )}
         </div>
       </header>
 
@@ -719,6 +744,33 @@ export default function App() {
                 className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
                 {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & GET +3 LIVES 🚀'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showRelaxHintModal && (
+          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
+              <button 
+                onClick={() => setShowRelaxHintModal(false)}
+                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+
+              <div className="text-3xl mb-2">💡</div>
+              <h3 className="text-base font-black text-sky-400 mb-1">NEED A HINT?</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                Watch a short ad to automatically center and focus the map on <strong className="text-yellow-400">{targetCountry}</strong>!
+              </p>
+
+              <button 
+                onClick={handleWatchRelaxHintAd}
+                disabled={isAdPlaying}
+                className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
+              >
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SHOW LOCATION 📍'}
               </button>
             </div>
           </div>
