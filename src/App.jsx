@@ -322,6 +322,12 @@ export default function App() {
     const newLevel = Math.floor(nextCorrectCount / 5) + 1;
 
     setScore(newScore);
+    
+    // Eğer seviye atlandıysa canları full'le (3 yap)
+    if (newLevel > level) {
+      setQuestionLives(3);
+    }
+    
     setLevel(newLevel);
 
     if (newScore > highScore) {
@@ -361,7 +367,8 @@ export default function App() {
       setScoreSaved(false);
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
     } else {
-      setToastMessage(`🎉 Correct! +${questionLives * 10} pts (${countryName})`);
+      const levelUpText = newLevel > level ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
+      setToastMessage(`🎉 Correct! +${questionLives * 10} pts${levelUpText}`);
       confetti({ particleCount: 40, spread: 40, origin: { y: 0.7 } });
       
       setTimeout(() => {
