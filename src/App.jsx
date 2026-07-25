@@ -154,6 +154,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState(null);
 
   const [isAdPlaying, setIsAdPlaying] = useState(false);
+  const [showAdModal, setShowAdModal] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const askedCountriesRef = useRef([]);
@@ -202,21 +203,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showExitConfirm) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showExitConfirm) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           triggerHaptic('error');
-          setGameState('gameover');
-          setScoreSaved(false);
+          setShowAdModal(true);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showExitConfirm]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showExitConfirm]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -243,8 +243,9 @@ export default function App() {
     setLevel(1);
     setCorrectCountries({});
     setScoreSaved(false);
+    setShowAdModal(false);
     askedCountriesRef.current = [];
-    setQuestionLives(3); // Oyun başında canlar 3 olarak atanır
+    setQuestionLives(3);
     setScreen('game');
     pickNewTarget(null, mode, continent, 1);
   };
@@ -295,7 +296,6 @@ export default function App() {
     } catch (e) {}
 
     setTargetCountry(newTarget);
-    // BURADAKİ setQuestionLives(3) KALDIRILDI! Artık doğru bilince canlar sıfırlanmıyor, mevcut can korunuyor.
     
     if (mode === 'challenge') {
       const calculatedTime = Math.max(7, 21 - currentLevel * 2);
@@ -321,6 +321,7 @@ export default function App() {
 
     setScore(newScore);
     setLevel(newLevel);
+    setQuestionLives(3); // Level up resets lives to full
 
     if (newScore > highScore) {
       setHighScore(newScore);
@@ -365,14 +366,28 @@ export default function App() {
     setQuestionLives((prev) => {
       const next = prev - 1;
       if (next <= 0) {
-        setGameState('gameover');
-        setScoreSaved(false);
+        setShowAdModal(true);
         return 0;
       }
       setToastMessage(`❌ Wrong! That was ${clickedName}`);
       setTimeout(() => setToastMessage(null), 1500);
       return next;
     });
+  };
+
+  const handleWatchAd = () => {
+    setIsAdPlaying(true);
+    setTimeout(() => {
+      setIsAdPlaying(false);
+      setShowAdModal(false);
+      setQuestionLives(3);
+    }, 1500);
+  };
+
+  const handleCloseAdModal = () => {
+    setShowAdModal(false);
+    setGameState('gameover');
+    setScoreSaved(false);
   };
 
   const getCountryStyle = (feature) => {
@@ -654,6 +669,33 @@ export default function App() {
           </div>
         )}
 
+        {showAdModal && (
+          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
+              <button 
+                onClick={handleCloseAdModal}
+                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+
+              <div className="text-3xl mb-2">🎬</div>
+              <h3 className="text-base font-black text-emerald-400 mb-1">CONTINUE GAME?</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                Watch a short ad to get <strong className="text-emerald-400">+3 Lives</strong> and keep your score and level going!
+              </p>
+
+              <button 
+                onClick={handleWatchAd}
+                disabled={isAdPlaying}
+                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
+              >
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & GET +3 LIVES 🚀'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {gameState === 'revealed' && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-slate-900/95 border border-slate-700 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md">
             <span className="text-xs text-slate-300">Viewing location of <strong className="text-yellow-400">{targetCountry}</strong></span>
@@ -688,8 +730,11 @@ export default function App() {
                 <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
                   {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
                 </button>
-                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700 transition">
-                  Play Again 🔄
+                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition">
+                  PLAY AGAIN 🔄
+                </button>
+                <button onClick={() => setScreen('leaderboard')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-slate-700 transition">
+                  LEADERBOARD 👑
                 </button>
               </div>
             </div>
