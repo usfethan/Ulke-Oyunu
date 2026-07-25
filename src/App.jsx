@@ -321,7 +321,7 @@ export default function App() {
 
     setScore(newScore);
     setLevel(newLevel);
-    setQuestionLives(3); // Level up resets lives to full
+    // Canlar artık doğru bilince sıfırlanmıyor / fullenmiyor; mevcut can korunuyor.
 
     if (newScore > highScore) {
       setHighScore(newScore);
@@ -701,7 +701,7 @@ export default function App() {
             <span className="text-xs text-slate-300">Viewing location of <strong className="text-yellow-400">{targetCountry}</strong></span>
             <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
               Play Again 🔄
-            </button>
+            </Link> {/* fixed trailing tag discrepancy below */}
           </div>
         )}
 
