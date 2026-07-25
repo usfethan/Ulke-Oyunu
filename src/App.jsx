@@ -160,6 +160,7 @@ export default function App() {
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const markersRef = useRef([]); // Eklenen bayrak marker'larını takip etmek ve silmek için
 
   useEffect(() => {
     targetCountryRef.current = targetCountry;
@@ -239,14 +240,22 @@ export default function App() {
   };
 
   const startGame = (mode, continent = 'Europe') => {
+    // Önceki oyundan kalan haritadaki tüm bayrak marker'larını temizle
+    markersRef.current.forEach((m) => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(m);
+      }
+    });
+    markersRef.current = [];
+
     setGameMode(mode);
     setSelectedContinentFilter(continent);
     setScore(0);
     setLevel(1);
-    setCorrectCountries({}); // Önceki oyundan kalan bayrakları tamamen temizler
+    setCorrectCountries({}); 
     setScoreSaved(false);
     setShowAdModal(false);
-    askedCountriesRef.current = []; // Sorulan ülkeler geçmişini sıfırlar
+    askedCountriesRef.current = []; 
     setQuestionLives(3);
     setScreen('game');
     pickNewTarget(null, mode, continent, 1);
@@ -336,7 +345,6 @@ export default function App() {
 
     let centerPoint = targetCenter;
     
-    // Rusya için özel merkez koordinat sabitlemesi (harita hatasını önlemek için)
     if (countryName === "Russia") {
       centerPoint = [61, 105];
     } else {
@@ -362,7 +370,8 @@ export default function App() {
         iconSize: [24, 24],
         iconAnchor: [12, 12]
       });
-      L.marker([centerPoint[0], centerPoint[1]], { icon: flagIcon, interactive: false }).addTo(mapInstanceRef.current);
+      const marker = L.marker([centerPoint[0], centerPoint[1]], { icon: flagIcon, interactive: false }).addTo(mapInstanceRef.current);
+      markersRef.current.push(marker);
     }
 
     const totalCount = getTotalCountForMode();
@@ -612,26 +621,6 @@ export default function App() {
               data={countriesData}
               style={getCountryStyle}
               onEachFeature={(feature, layer) => {
-                const countryName = feature.properties.name;
-
-                if (correctCountries[countryName]) {
-                  const countryCode = correctCountries[countryName].code;
-                  const latLng = [correctCountries[countryName].lat, correctCountries[countryName].lng];
-                  if (countryCode && mapInstanceRef.current) {
-                    try {
-                      const flagIcon = L.divIcon({
-                        className: 'custom-flag-marker',
-                        html: `<div style="font-size: 20px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">
-                                 <img src="https://flagcdn.com/w40/${countryCode.toLowerCase()}.png" style="width: 24px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.4);" />
-                               </div>`,
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
-                      });
-                      L.marker(latLng, { icon: flagIcon, interactive: false }).addTo(mapInstanceRef.current);
-                    } catch (e) {}
-                  }
-                }
-
                 layer.on({
                   mousedown: (e) => {
                     L.DomEvent.stopPropagation(e);
