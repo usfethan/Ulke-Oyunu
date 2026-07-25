@@ -156,7 +156,6 @@ export default function App() {
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [showRelaxHintModal, setShowRelaxHintModal] = useState(false);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
@@ -207,7 +206,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showRelaxHintModal || showExitConfirm) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showRelaxHintModal) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -220,7 +219,7 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showRelaxHintModal, showExitConfirm]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showRelaxHintModal]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -609,15 +608,6 @@ export default function App() {
             <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
             <span className="text-xs font-bold text-emerald-400">{score}</span>
           </div>
-
-          {gameMode === 'relax' && (
-            <button 
-              onClick={() => setShowRelaxHintModal(true)} 
-              className="bg-sky-500/20 border border-sky-500/40 hover:bg-sky-500/30 text-sky-300 px-2 py-1.5 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1"
-            >
-              💡 Hint
-            </button>
-          )}
         </div>
       </header>
 
@@ -672,6 +662,17 @@ export default function App() {
           )}
           <MapFocusHandler gameMode={gameMode} continent={selectedContinentFilter} gameState={gameState} targetCenter={targetCenter} />
         </MapContainer>
+
+        {gameMode === 'relax' && gameState === 'playing' && (
+          <div className="absolute top-4 right-4 z-[950]">
+            <button 
+              onClick={() => setShowRelaxHintModal(true)} 
+              className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-sky-300 transition flex items-center gap-2 animate-pulse"
+            >
+              <span className="text-base">💡</span> Neresi? (İpucu)
+            </button>
+          </div>
+        )}
 
         {gameState === 'gameover' && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
