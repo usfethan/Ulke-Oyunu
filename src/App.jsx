@@ -159,6 +159,8 @@ export default function App() {
 
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+
   useEffect(() => {
     targetCountryRef.current = targetCountry;
   }, [targetCountry]);
@@ -309,7 +311,7 @@ export default function App() {
     setToastMessage(null);
   };
 
-  const handleCorrectAnswer = (countryFeature) => {
+  const handleCorrectAnswer = (countryFeature, layerInstance) => {
     playSound('correct');
     triggerHaptic('success');
 
@@ -321,19 +323,35 @@ export default function App() {
 
     setScore(newScore);
     setLevel(newLevel);
-    // Canlar artık doğru bilince sıfırlanmıyor / fullenmiyor; mevcut can korunuyor.
 
     if (newScore > highScore) {
       setHighScore(newScore);
       localStorage.setItem('geo_high_score', newScore.toString());
     }
 
+    let centerPoint = targetCenter;
+    try {
+      const b = layerInstance.getBounds();
+      const c = b.getCenter();
+      centerPoint = [c.lat, c.lng];
+    } catch (e) {}
+
     const code = getCountryCode(countryName);
-    if (code && targetCenter) {
+    if (code && centerPoint && mapInstanceRef.current) {
       setCorrectCountries((prev) => ({
         ...prev,
-        [countryName]: { code, lat: targetCenter[0], lng: targetCenter[1] }
+        [countryName]: { code, lat: centerPoint[0], lng: centerPoint[1] }
       }));
+
+      const flagIcon = L.divIcon({
+        className: 'custom-flag-marker',
+        html: `<div style="font-size: 20px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">
+                 <img src="https://flagcdn.com/w40/${code.toLowerCase()}.png" style="width: 24px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.4);" />
+               </div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+      L.marker([centerPoint[0], centerPoint[1]], { icon: flagIcon, interactive: false }).addTo(mapInstanceRef.current);
     }
 
     const totalCount = getTotalCountForMode();
@@ -514,44 +532,44 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-slate-950 text-white overflow-hidden select-none">
-      <header className="flex items-center justify-between px-3 py-2 pt-12 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 z-20 shadow-md">
-        <button onClick={() => setScreen('menu')} className="text-xs font-bold text-slate-400 bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-700">
+      <header className="flex items-center justify-between px-2 py-2 pt-12 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 z-20 shadow-md gap-1">
+        <button onClick={() => setScreen('menu')} className="text-xs font-bold text-slate-400 bg-slate-800 px-2 py-1.5 rounded-xl border border-slate-700 shrink-0">
           🏠
         </button>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           {gameMode === 'challenge' ? (
-            <div className="bg-amber-500/10 border border-amber-500/40 px-2 py-1 rounded-xl text-center">
+            <div className="bg-amber-500/10 border border-amber-500/40 px-1.5 py-1 rounded-xl text-center shrink-0">
               <span className="text-[8px] text-amber-400 block font-bold">LVL</span>
               <span className="text-xs font-black text-amber-300">{level}</span>
             </div>
           ) : (
-            <div className="bg-slate-800 px-2 py-1 rounded-xl border border-slate-700 text-center">
+            <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
               <span className="text-[8px] text-slate-400 block font-semibold">PROG</span>
               <span className="text-xs font-bold text-sky-400">{foundCountriesCount}/{totalCountries}</span>
             </div>
           )}
 
           {gameMode !== 'relax' && (
-            <div className="bg-slate-800 px-2 py-1 rounded-xl border border-slate-700 text-center">
+            <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
               <span className="text-[8px] text-slate-400 block font-semibold">TIME</span>
               <span className={`text-xs font-bold ${timeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-sky-400'}`}>{timeLeft}s</span>
             </div>
           )}
 
           {gameMode !== 'relax' && (
-            <div className="bg-slate-800 px-2 py-1 rounded-xl border border-slate-700 text-center">
+            <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
               <span className="text-[8px] text-slate-400 block font-semibold">LIVES</span>
-              <span className="text-xs text-rose-400 font-bold">{'❤️'.repeat(questionLives)}</span>
+              <span className="text-[11px] text-rose-400 font-bold tracking-tighter">{'❤️'.repeat(questionLives)}</span>
             </div>
           )}
 
-          <div className="bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-700 text-center max-w-[120px]">
+          <div className="bg-slate-800 px-2 py-1 rounded-xl border border-slate-700 text-center shrink-0 max-w-[100px]">
             <span className="text-[8px] text-slate-400 block font-semibold">TARGET</span>
             <span className="text-xs font-extrabold text-yellow-400 truncate block">{targetCountry || '...'}</span>
           </div>
 
-          <div className="bg-slate-800 px-2 py-1 rounded-xl border border-slate-700 text-center">
+          <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
             <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
             <span className="text-xs font-bold text-emerald-400">{score}</span>
           </div>
@@ -565,7 +583,16 @@ export default function App() {
           </div>
         )}
 
-        <MapContainer center={[20, 0]} zoom={2} zoomControl={false} scrollWheelZoom={true} style={{ width: '100%', height: '100%', background: '#090d16' }}>
+        <MapContainer 
+          center={[20, 0]} 
+          zoom={2} 
+          zoomControl={false} 
+          scrollWheelZoom={true} 
+          style={{ width: '100%', height: '100%', background: '#090d16' }}
+          ref={(map) => {
+            if (map) mapInstanceRef.current = map;
+          }}
+        >
           <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png" maxZoom={19} />
           {countriesData && (
             <GeoJSON
@@ -577,9 +604,9 @@ export default function App() {
 
                 if (correctCountries[countryName]) {
                   const countryCode = correctCountries[countryName].code;
-                  if (countryCode) {
+                  const latLng = [correctCountries[countryName].lat, correctCountries[countryName].lng];
+                  if (countryCode && mapInstanceRef.current) {
                     try {
-                      const center = layer.getBounds().getCenter();
                       const flagIcon = L.divIcon({
                         className: 'custom-flag-marker',
                         html: `<div style="font-size: 20px; text-align: center; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">
@@ -588,7 +615,7 @@ export default function App() {
                         iconSize: [24, 24],
                         iconAnchor: [12, 12]
                       });
-                      L.marker([center.lat, center.lng], { icon: flagIcon, interactive: false }).addTo(layer._map);
+                      L.marker(latLng, { icon: flagIcon, interactive: false }).addTo(mapInstanceRef.current);
                     } catch (e) {}
                   }
                 }
@@ -608,7 +635,7 @@ export default function App() {
                     const currentTarget = targetCountryRef.current;
 
                     if (clickedName?.toLowerCase() === currentTarget?.toLowerCase()) {
-                      handleCorrectAnswer(feature);
+                      handleCorrectAnswer(feature, layer);
                     } else {
                       handleWrongClick(clickedName);
                     }
@@ -701,7 +728,7 @@ export default function App() {
             <span className="text-xs text-slate-300">Viewing location of <strong className="text-yellow-400">{targetCountry}</strong></span>
             <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
               Play Again 🔄
-            </Link> {/* fixed trailing tag discrepancy below */}
+            </button>
           </div>
         )}
 
