@@ -30,7 +30,7 @@ const playSound = (type) => {
 
 const CONTINENT_BOUNDS = {
   "Europe": { center: [54, 15], zoom: 4 },
-  "Asia-Pacific": { center: [15, 105], zoom: 3 },
+  "Asia & Middle East": { center: [25, 65], zoom: 3 },
   "Americas": { center: [10, -80], zoom: 2.5 },
   "Africa": { center: [2, 20], zoom: 3 }
 };
@@ -39,35 +39,35 @@ const COUNTRY_DETAILS = {
   "United States": { code: "us", capital: "Washington, D.C.", continent: "Americas", tier: 1 },
   "Canada": { code: "ca", capital: "Ottawa", continent: "Americas", tier: 1 },
   "Brazil": { code: "br", capital: "Brasília", continent: "Americas", tier: 1 },
-  "China": { code: "cn", capital: "Beijing", continent: "Asia-Pacific", tier: 1 },
+  "China": { code: "cn", capital: "Beijing", continent: "Asia & Middle East", tier: 1 },
   "Russia": { code: "ru", capital: "Moscow", continent: "Europe", tier: 1 },
-  "Australia": { code: "au", capital: "Canberra", continent: "Asia-Pacific", tier: 1 },
-  "India": { code: "in", capital: "New Delhi", continent: "Asia-Pacific", tier: 1 },
+  "Australia": { code: "au", capital: "Canberra", continent: "Asia & Middle East", tier: 1 },
+  "India": { code: "in", capital: "New Delhi", continent: "Asia & Middle East", tier: 1 },
   "France": { code: "fr", capital: "Paris", continent: "Europe", tier: 1 },
   "Germany": { code: "de", capital: "Berlin", continent: "Europe", tier: 1 },
   "Italy": { code: "it", capital: "Rome", continent: "Europe", tier: 1 },
   "United Kingdom": { code: "gb", capital: "London", continent: "Europe", tier: 1 },
-  "Japan": { code: "jp", capital: "Tokyo", continent: "Asia-Pacific", tier: 1 },
+  "Japan": { code: "jp", capital: "Tokyo", continent: "Asia & Middle East", tier: 1 },
   "Egypt": { code: "eg", capital: "Cairo", continent: "Africa", tier: 1 },
-  "Turkey": { code: "tr", capital: "Ankara", continent: "Asia-Pacific", tier: 1 },
+  "Turkey": { code: "tr", capital: "Ankara", continent: "Asia & Middle East", tier: 1 },
   "Argentina": { code: "ar", capital: "Buenos Aires", continent: "Americas", tier: 1 },
   "Spain": { code: "es", capital: "Madrid", continent: "Europe", tier: 2 },
   "Mexico": { code: "mx", capital: "Mexico City", continent: "Americas", tier: 2 },
   "South Africa": { code: "za", capital: "Pretoria", continent: "Africa", tier: 2 },
-  "Saudi Arabia": { code: "sa", capital: "Riyadh", continent: "Asia-Pacific", tier: 2 },
+  "Saudi Arabia": { code: "sa", capital: "Riyadh", continent: "Asia & Middle East", tier: 2 },
   "Colombia": { code: "co", capital: "Bogotá", continent: "Americas", tier: 2 },
   "Sweden": { code: "se", capital: "Stockholm", continent: "Europe", tier: 2 },
   "Norway": { code: "no", capital: "Oslo", continent: "Europe", tier: 2 },
   "Poland": { code: "pl", capital: "Warsaw", continent: "Europe", tier: 2 },
   "Ukraine": { code: "ua", capital: "Kyiv", continent: "Europe", tier: 2 },
-  "Iran": { code: "ir", capital: "Tehran", continent: "Asia-Pacific", tier: 2 },
-  "South Korea": { code: "kr", capital: "Seoul", continent: "Asia-Pacific", tier: 2 },
-  "Indonesia": { code: "id", capital: "Jakarta", continent: "Asia-Pacific", tier: 2 },
-  "Thailand": { code: "th", capital: "Bangkok", continent: "Asia-Pacific", tier: 2 },
+  "Iran": { code: "ir", capital: "Tehran", continent: "Asia & Middle East", tier: 2 },
+  "South Korea": { code: "kr", capital: "Seoul", continent: "Asia & Middle East", tier: 2 },
+  "Indonesia": { code: "id", capital: "Jakarta", continent: "Asia & Middle East", tier: 2 },
+  "Thailand": { code: "th", capital: "Bangkok", continent: "Asia & Middle East", tier: 2 },
   "Nigeria": { code: "ng", capital: "Abuja", continent: "Africa", tier: 2 },
   "Algeria": { code: "dz", capital: "Algiers", continent: "Africa", tier: 2 },
   "Chile": { code: "cl", capital: "Santiago", continent: "Americas", tier: 2 },
-  "Palestine": { code: "ps", capital: "Jerusalem", continent: "Asia-Pacific", tier: 3 },
+  "Palestine": { code: "ps", capital: "Jerusalem", continent: "Asia & Middle East", tier: 3 },
   "Nicaragua": { code: "ni", capital: "Managua", continent: "Americas", tier: 3 },
   "Peru": { code: "pe", capital: "Lima", continent: "Americas", tier: 3 },
   "Venezuela": { code: "ve", capital: "Caracas", continent: "Americas", tier: 3 },
@@ -77,32 +77,34 @@ const COUNTRY_DETAILS = {
   "Portugal": { code: "pt", capital: "Lisbon", continent: "Europe", tier: 3 },
   "Ireland": { code: "ie", capital: "Dublin", continent: "Europe", tier: 3 },
   "Romania": { code: "ro", capital: "Bucharest", continent: "Europe", tier: 3 },
-  "Vietnam": { code: "vn", capital: "Hanoi", continent: "Asia-Pacific", tier: 3 },
-  "Philippines": { code: "ph", capital: "Manila", continent: "Asia-Pacific", tier: 3 },
-  "Pakistan": { code: "pk", capital: "Islamabad", continent: "Asia-Pacific", tier: 3 },
-  "Kazakhstan": { code: "kz", capital: "Astana", continent: "Asia-Pacific", tier: 3 },
-  "Iraq": { code: "iq", capital: "Baghdad", continent: "Asia-Pacific", tier: 3 },
+  "Vietnam": { code: "vn", capital: "Hanoi", continent: "Asia & Middle East", tier: 3 },
+  "Philippines": { code: "ph", capital: "Manila", continent: "Asia & Middle East", tier: 3 },
+  "Pakistan": { code: "pk", capital: "Islamabad", continent: "Asia & Middle East", tier: 3 },
+  "Kazakhstan": { code: "kz", capital: "Astana", continent: "Asia & Middle East", tier: 3 },
+  "Iraq": { code: "iq", capital: "Baghdad", continent: "Asia & Middle East", tier: 3 },
   "Morocco": { code: "ma", capital: "Rabat", continent: "Africa", tier: 3 },
   "Kenya": { code: "ke", capital: "Nairobi", continent: "Africa", tier: 3 },
   "Ethiopia": { code: "et", capital: "Addis Ababa", continent: "Africa", tier: 3 },
-  "New Zealand": { code: "nz", capital: "Wellington", continent: "Asia-Pacific", tier: 3 },
+  "New Zealand": { code: "nz", capital: "Wellington", continent: "Asia & Middle East", tier: 3 },
   "Bolivia": { code: "bo", capital: "Sucre", continent: "Americas", tier: 4 },
   "Paraguay": { code: "py", capital: "Asunción", continent: "Americas", tier: 4 },
   "Uruguay": { code: "uy", capital: "Montevideo", continent: "Americas", tier: 4 },
-  "Jordan": { code: "jo", capital: "Amman", continent: "Asia-Pacific", tier: 4 },
-  "Lebanon": { code: "lb", capital: "Beirut", continent: "Asia-Pacific", tier: 4 },
-  "Syria": { code: "sy", capital: "Damascus", continent: "Asia-Pacific", tier: 4 }
+  "Jordan": { code: "jo", capital: "Amman", continent: "Asia & Middle East", tier: 4 },
+  "Lebanon": { code: "lb", capital: "Beirut", continent: "Asia & Middle East", tier: 4 },
+  "Syria": { code: "sy", capital: "Damascus", continent: "Asia & Middle East", tier: 4 }
 };
 
 const getCountryCode = (name) => COUNTRY_DETAILS[name]?.code || null;
 
-function MapFocusHandler({ gameMode, continent, gameState, targetCenter }) {
+function MapFocusHandler({ gameMode, continent, gameState, targetCenter, relaxedHintCenter }) {
   const map = useMap();
   
   useEffect(() => {
     setTimeout(() => { map.invalidateSize(); }, 150);
 
-    if (gameState === 'gameover' || gameState === 'victory') {
+    if (relaxedHintCenter) {
+      map.flyTo(relaxedHintCenter, 4, { duration: 1.2 });
+    } else if (gameState === 'gameover' || gameState === 'victory') {
       if (targetCenter) {
         map.flyTo(targetCenter, 3.5, { duration: 1.5 });
       }
@@ -112,7 +114,7 @@ function MapFocusHandler({ gameMode, continent, gameState, targetCenter }) {
     } else if (gameState === 'playing' && gameMode === 'challenge') {
       map.setView([20, 0], 2, { animate: true, duration: 1 });
     }
-  }, [map, gameMode, continent, gameState, targetCenter]);
+  }, [map, gameMode, continent, gameState, targetCenter, relaxedHintCenter]);
 
   return null;
 }
@@ -156,6 +158,8 @@ export default function App() {
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
+  const [showRelaxHintAdModal, setShowRelaxHintAdModal] = useState(false);
+  const [relaxedHintCenter, setRelaxedHintCenter] = useState(null);
 
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
@@ -206,7 +210,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal || showRelaxHintAdModal) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -219,7 +223,7 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintAdModal]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -255,6 +259,8 @@ export default function App() {
     setScoreSaved(false);
     setShowAdModal(false);
     setShowTimeUpModal(false);
+    setShowRelaxHintAdModal(false);
+    setRelaxedHintCenter(null);
     askedCountriesRef.current = []; 
     setQuestionLives(3);
     setScreen('game');
@@ -307,6 +313,7 @@ export default function App() {
     } catch (e) {}
 
     setTargetCountry(newTarget);
+    setRelaxedHintCenter(null);
     
     if (mode === 'challenge') {
       const calculatedTime = Math.max(7, 21 - currentLevel * 2);
@@ -435,6 +442,17 @@ export default function App() {
     }, 1500);
   };
 
+  const handleWatchRelaxHintAd = () => {
+    setIsAdPlaying(true);
+    setTimeout(() => {
+      setIsAdPlaying(false);
+      setShowRelaxHintAdModal(false);
+      if (targetCenter) {
+        setRelaxedHintCenter(targetCenter);
+      }
+    }, 1500);
+  };
+
   const handleCloseAdModal = () => {
     setShowAdModal(false);
     setGameState('gameover');
@@ -552,7 +570,7 @@ export default function App() {
               <span className="text-[9px] bg-sky-950 text-sky-300 px-2 py-0.5 rounded-full">No Timer</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {['Europe', 'Asia-Pacific', 'Americas', 'Africa'].map((cont) => (
+              {['Europe', 'Asia & Middle East', 'Americas', 'Africa'].map((cont) => (
                 <button key={cont} onClick={() => startGame('relax', cont)} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 px-1 rounded-xl border border-slate-700 text-center truncate">
                   {cont}
                 </button>
@@ -612,6 +630,15 @@ export default function App() {
             <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
             <span className="text-xs font-bold text-emerald-400">{score}</span>
           </div>
+
+          {gameMode === 'relax' && (
+            <button 
+              onClick={() => setShowRelaxHintAdModal(true)}
+              className="bg-sky-600 hover:bg-sky-500 text-white font-bold px-2.5 py-1 rounded-xl text-[10px] shrink-0 border border-sky-400 transition shadow"
+            >
+              💡 HINT
+            </button>
+          )}
         </div>
       </header>
 
@@ -668,7 +695,7 @@ export default function App() {
               }}
             />
           )}
-          <MapFocusHandler gameMode={gameMode} continent={selectedContinentFilter} gameState={gameState} targetCenter={targetCenter} />
+          <MapFocusHandler gameMode={gameMode} continent={selectedContinentFilter} gameState={gameState} targetCenter={targetCenter} relaxedHintCenter={relaxedHintCenter} />
         </MapContainer>
 
         {gameState === 'gameover' && (
@@ -766,6 +793,33 @@ export default function App() {
                 className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
                 {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD +20 SEC ⏳'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showRelaxHintAdModal && (
+          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
+              <button 
+                onClick={() => setShowRelaxHintAdModal(false)}
+                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+
+              <div className="text-3xl mb-2">💡</div>
+              <h3 className="text-base font-black text-sky-400 mb-1">SHOW HINT?</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                Watch a short ad to automatically zoom in and see the location of <strong className="text-yellow-400">{targetCountry}</strong>!
+              </p>
+
+              <button 
+                onClick={handleWatchRelaxHintAd}
+                disabled={isAdPlaying}
+                className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
+              >
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SHOW LOCATION 🔍'}
               </button>
             </div>
           </div>
