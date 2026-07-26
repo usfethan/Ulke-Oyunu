@@ -720,6 +720,10 @@ export default function App() {
                     L.DomEvent.stopPropagation(e);
                     L.DomEvent.preventDefault(e);
 
+                    if (gameState === 'revealed' || gameState === 'gameover' || gameState === 'victory') {
+                      return;
+                    }
+
                     const clickedName = feature.properties.name;
                     const currentTarget = targetCountryRef.current;
 
