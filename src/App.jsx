@@ -103,7 +103,7 @@ function MapFocusHandler({ gameMode, continent, gameState, targetCenter, relaxed
     setTimeout(() => { map.invalidateSize(); }, 150);
 
     if (relaxedHintCenter) {
-      map.flyTo(relaxedHintCenter, 4, { duration: 1.2 });
+      map.flyTo(relaxedHintCenter, 5, { duration: 1.2 });
     } else if (gameState === 'gameover' || gameState === 'victory') {
       if (targetCenter) {
         map.flyTo(targetCenter, 3.5, { duration: 1.5 });
@@ -160,6 +160,7 @@ export default function App() {
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showRelaxHintAdModal, setShowRelaxHintAdModal] = useState(false);
   const [relaxedHintCenter, setRelaxedHintCenter] = useState(null);
+  const [isHintActive, setIsHintActive] = useState(false);
 
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
@@ -261,6 +262,7 @@ export default function App() {
     setShowTimeUpModal(false);
     setShowRelaxHintAdModal(false);
     setRelaxedHintCenter(null);
+    setIsHintActive(false);
     askedCountriesRef.current = []; 
     setQuestionLives(3);
     setScreen('game');
@@ -314,6 +316,7 @@ export default function App() {
 
     setTargetCountry(newTarget);
     setRelaxedHintCenter(null);
+    setIsHintActive(false);
     
     if (mode === 'challenge') {
       const calculatedTime = Math.max(7, 21 - currentLevel * 2);
@@ -447,6 +450,7 @@ export default function App() {
     setTimeout(() => {
       setIsAdPlaying(false);
       setShowRelaxHintAdModal(false);
+      setIsHintActive(true);
       if (targetCenter) {
         setRelaxedHintCenter(targetCenter);
       }
@@ -482,6 +486,10 @@ export default function App() {
 
     if (gameState === 'gameover' && name?.toLowerCase() === targetCountry?.toLowerCase()) {
       return { ...baseStyle, fillColor: '#ef4444', fillOpacity: 0.9, weight: 2.5, color: '#fef08a' };
+    }
+
+    if (gameMode === 'relax' && isHintActive && name?.toLowerCase() === targetCountry?.toLowerCase()) {
+      return { ...baseStyle, fillColor: '#f59e0b', fillOpacity: 0.9, weight: 3, color: '#fef08a' };
     }
 
     if (highlightedContinent) {
@@ -811,7 +819,7 @@ export default function App() {
               <div className="text-3xl mb-2">💡</div>
               <h3 className="text-base font-black text-sky-400 mb-1">SHOW HINT?</h3>
               <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch a short ad to automatically zoom in and see the location of <strong className="text-yellow-400">{targetCountry}</strong>!
+                Watch a short ad to zoom in and <strong className="text-amber-400">highlight</strong> the location of <strong className="text-yellow-400">{targetCountry}</strong>!
               </p>
 
               <button 
@@ -819,7 +827,7 @@ export default function App() {
                 disabled={isAdPlaying}
                 className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SHOW LOCATION 🔍'}
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & HIGHLIGHT 🔍'}
               </button>
             </div>
           </div>
@@ -850,7 +858,7 @@ export default function App() {
                 <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
                   {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
                 </button>
-                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition">
+                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs transition">
                   PLAY AGAIN 🔄
                 </button>
                 <button onClick={() => setScreen('leaderboard')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-slate-700 transition">
