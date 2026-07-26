@@ -157,6 +157,8 @@ export default function App() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showRelaxHintModal, setShowRelaxHintModal] = useState(false);
+  const [showChallengeHintModal, setShowChallengeHintModal] = useState(false);
+  const [isHintActive, setIsHintActive] = useState(false);
 
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
@@ -207,14 +209,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal || showRelaxHintModal) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal || showRelaxHintModal || showChallengeHintModal || isHintActive) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           triggerHaptic('error');
-          
-          // Süre bittiğinde Time's Up modalı açılır
           setShowTimeUpModal(true);
           return 0;
         }
@@ -222,7 +222,7 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintModal]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintModal, showChallengeHintModal, isHintActive]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -259,6 +259,8 @@ export default function App() {
     setShowAdModal(false);
     setShowTimeUpModal(false);
     setShowRelaxHintModal(false);
+    setShowChallengeHintModal(false);
+    setIsHintActive(false);
     askedCountriesRef.current = []; 
     setQuestionLives(3);
     setScreen('game');
@@ -275,6 +277,9 @@ export default function App() {
   const pickNewTarget = (featuresList, mode = gameMode, continentFilter = selectedContinentFilter, currentLevel = level) => {
     const list = featuresList || (countriesData && countriesData.features);
     if (!list || list.length === 0) return;
+
+    setIsHintActive(false);
+    setShowChallengeHintModal(false);
 
     let validCountries = list.filter((f) => COUNTRY_DETAILS[f.properties.name]);
 
@@ -329,7 +334,7 @@ export default function App() {
     triggerHaptic('success');
 
     const countryName = countryFeature.properties.name;
-    const ptsEarned = gameMode === 'relax' ? 10 : (questionLives * 10);
+    const ptsEarned = isHintActive ? 0 : (gameMode === 'relax' ? 10 : (questionLives * 10));
     const newScore = score + ptsEarned;
     
     const nextCorrectCount = Object.keys(correctCountries).length + 1;
@@ -386,8 +391,9 @@ export default function App() {
       setScoreSaved(false);
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
     } else {
+      const hintText = isHintActive ? ` (Hint used - 0 pts)` : ` +${ptsEarned} pts`;
       const levelUpText = (newLevel > level && gameMode === 'challenge') ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
-      setToastMessage(`🎉 Correct! +${ptsEarned} pts${levelUpText}`);
+      setToastMessage(`🎉 Correct!${hintText}${levelUpText}`);
       confetti({ particleCount: 40, spread: 40, origin: { y: 0.7 } });
       
       setTimeout(() => {
@@ -481,6 +487,31 @@ export default function App() {
     }, 1500);
   };
 
+  const handleWatchChallengeHintAd = () => {
+    setIsAdPlaying(true);
+    setTimeout(() => {
+      setIsAdPlaying(false);
+      setShowChallengeHintModal(false);
+      setIsHintActive(true);
+
+      if (countriesData && countriesData.features && targetCountry) {
+        const targetFeature = countriesData.features.find(f => f.properties.name.toLowerCase() === targetCountry.toLowerCase());
+        if (targetFeature && mapInstanceRef.current) {
+          try {
+            const layer = L.geoJSON(targetFeature);
+            const b = layer.getBounds();
+            const c = b.getCenter();
+            const centerPoint = targetCountry === "Russia" ? [61, 105] : [c.lat, c.lng];
+            
+            mapInstanceRef.current.flyTo(centerPoint, 4, { duration: 1.5 });
+          } catch (e) {}
+        }
+      }
+
+      setToastMessage(`💡 Hint active! Timer stopped. Click on ${targetCountry}!`);
+    }, 1500);
+  };
+
   const getCountryStyle = (feature) => {
     const name = feature.properties.name;
     const details = COUNTRY_DETAILS[name];
@@ -494,6 +525,10 @@ export default function App() {
 
     if (correctCountries[name]) {
       return { ...baseStyle, fillColor: '#10b981', fillOpacity: 0.8, weight: 1.5, color: '#34d399' };
+    }
+
+    if (isHintActive && name?.toLowerCase() === targetCountry?.toLowerCase()) {
+      return { ...baseStyle, fillColor: '#fbbf24', fillOpacity: 0.9, weight: 3, color: '#fef08a', className: 'leaflet-interactive pointer-events-auto animate-pulse' };
     }
 
     if (gameState === 'revealed' && name?.toLowerCase() === targetCountry?.toLowerCase()) {
@@ -626,7 +661,7 @@ export default function App() {
           {gameMode !== 'relax' && (
             <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
               <span className="text-[8px] text-slate-400 block font-semibold">TIME</span>
-              <span className={`text-xs font-bold ${timeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-sky-400'}`}>{timeLeft}s</span>
+              <span className={`text-xs font-bold ${timeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-sky-400'}`}>{isHintActive ? 'PAUSED' : `${timeLeft}s`}</span>
             </div>
           )}
 
@@ -708,6 +743,17 @@ export default function App() {
               className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-sky-300 transition flex items-center gap-2 animate-pulse"
             >
               <span className="text-base">💡</span> Where is it? (Hint)
+            </button>
+          </div>
+        )}
+
+        {gameMode === 'challenge' && gameState === 'playing' && !isHintActive && (
+          <div className="absolute top-4 right-4 z-[950]">
+            <button 
+              onClick={() => setShowChallengeHintModal(true)} 
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-amber-300 transition flex items-center gap-2 animate-pulse"
+            >
+              <span className="text-base">💡</span> Hint (Blink)
             </button>
           </div>
         )}
@@ -837,6 +883,33 @@ export default function App() {
                 className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
                 {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SELECT COUNTRY 📍'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showChallengeHintModal && (
+          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
+              <button 
+                onClick={() => setShowChallengeHintModal(false)}
+                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+
+              <div className="text-3xl mb-2">💡</div>
+              <h3 className="text-base font-black text-amber-400 mb-1">HINT (BLINK)</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                Watch an ad to stop the timer and make <strong className="text-yellow-400">{targetCountry}</strong> blink on the map! <span className="text-amber-400 block mt-1">(0 points for this question)</span>
+              </p>
+
+              <button 
+                onClick={handleWatchChallengeHintAd}
+                disabled={isAdPlaying}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
+              >
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SHOW HINT ✨'}
               </button>
             </div>
           </div>
