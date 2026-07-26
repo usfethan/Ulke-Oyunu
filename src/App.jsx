@@ -102,7 +102,7 @@ function MapFocusHandler({ gameMode, continent, gameState, targetCenter }) {
   useEffect(() => {
     setTimeout(() => { map.invalidateSize(); }, 150);
 
-    if (gameState === 'revealed' || gameState === 'gameover' || gameState === 'victory') {
+    if (gameState === 'gameover' || gameState === 'victory') {
       if (targetCenter) {
         map.flyTo(targetCenter, 3.5, { duration: 1.5 });
       }
@@ -156,9 +156,6 @@ export default function App() {
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
-  const [showRelaxHintModal, setShowRelaxHintModal] = useState(false);
-  const [showChallengeHintModal, setShowChallengeHintModal] = useState(false);
-  const [isHintActive, setIsHintActive] = useState(false);
 
   const askedCountriesRef = useRef([]);
   const targetCountryRef = useRef(null);
@@ -209,7 +206,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal || showRelaxHintModal || showChallengeHintModal || isHintActive) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -222,7 +219,7 @@ export default function App() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintModal, showChallengeHintModal, isHintActive]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -258,9 +255,6 @@ export default function App() {
     setScoreSaved(false);
     setShowAdModal(false);
     setShowTimeUpModal(false);
-    setShowRelaxHintModal(false);
-    setShowChallengeHintModal(false);
-    setIsHintActive(false);
     askedCountriesRef.current = []; 
     setQuestionLives(3);
     setScreen('game');
@@ -277,9 +271,6 @@ export default function App() {
   const pickNewTarget = (featuresList, mode = gameMode, continentFilter = selectedContinentFilter, currentLevel = level) => {
     const list = featuresList || (countriesData && countriesData.features);
     if (!list || list.length === 0) return;
-
-    setIsHintActive(false);
-    setShowChallengeHintModal(false);
 
     let validCountries = list.filter((f) => COUNTRY_DETAILS[f.properties.name]);
 
@@ -334,7 +325,7 @@ export default function App() {
     triggerHaptic('success');
 
     const countryName = countryFeature.properties.name;
-    const ptsEarned = isHintActive ? 0 : (gameMode === 'relax' ? 10 : (questionLives * 10));
+    const ptsEarned = (gameMode === 'relax' ? 10 : (questionLives * 10));
     const newScore = score + ptsEarned;
     
     const nextCorrectCount = Object.keys(correctCountries).length + 1;
@@ -391,9 +382,8 @@ export default function App() {
       setScoreSaved(false);
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
     } else {
-      const hintText = isHintActive ? ` (Hint used - 0 pts)` : ` +${ptsEarned} pts`;
       const levelUpText = (newLevel > level && gameMode === 'challenge') ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
-      setToastMessage(`🎉 Correct!${hintText}${levelUpText}`);
+      setToastMessage(`🎉 Correct! +${ptsEarned} pts${levelUpText}`);
       confetti({ particleCount: 40, spread: 40, origin: { y: 0.7 } });
       
       setTimeout(() => {
@@ -457,61 +447,6 @@ export default function App() {
     setScoreSaved(false);
   };
 
-  const handleWatchRelaxHintAd = () => {
-    setIsAdPlaying(true);
-    setTimeout(() => {
-      setIsAdPlaying(false);
-      setShowRelaxHintModal(false);
-      
-      if (countriesData && countriesData.features && targetCountry) {
-        const targetFeature = countriesData.features.find(f => f.properties.name.toLowerCase() === targetCountry.toLowerCase());
-        if (targetFeature && mapInstanceRef.current) {
-          try {
-            const layer = L.geoJSON(targetFeature);
-            const b = layer.getBounds();
-            const c = b.getCenter();
-            const centerPoint = targetCountry === "Russia" ? [61, 105] : [c.lat, c.lng];
-            
-            mapInstanceRef.current.flyTo(centerPoint, 4, { duration: 1.5 });
-            handleCorrectAnswer(targetFeature, layer);
-            return;
-          } catch (e) {}
-        }
-      }
-
-      if (targetCenter && mapInstanceRef.current) {
-        mapInstanceRef.current.flyTo(targetCenter, 4, { duration: 1.5 });
-      }
-      setToastMessage(`💡 ${targetCountry} selected and shown!`);
-      setTimeout(() => setToastMessage(null), 2000);
-    }, 1500);
-  };
-
-  const handleWatchChallengeHintAd = () => {
-    setIsAdPlaying(true);
-    setTimeout(() => {
-      setIsAdPlaying(false);
-      setShowChallengeHintModal(false);
-      setIsHintActive(true);
-
-      if (countriesData && countriesData.features && targetCountry) {
-        const targetFeature = countriesData.features.find(f => f.properties.name.toLowerCase() === targetCountry.toLowerCase());
-        if (targetFeature && mapInstanceRef.current) {
-          try {
-            const layer = L.geoJSON(targetFeature);
-            const b = layer.getBounds();
-            const c = b.getCenter();
-            const centerPoint = targetCountry === "Russia" ? [61, 105] : [c.lat, c.lng];
-            
-            mapInstanceRef.current.flyTo(centerPoint, 4, { duration: 1.5 });
-          } catch (e) {}
-        }
-      }
-
-      setToastMessage(`💡 Hint active! Timer stopped. Click on ${targetCountry}!`);
-    }, 1500);
-  };
-
   const getCountryStyle = (feature) => {
     const name = feature.properties.name;
     const details = COUNTRY_DETAILS[name];
@@ -527,11 +462,7 @@ export default function App() {
       return { ...baseStyle, fillColor: '#10b981', fillOpacity: 0.8, weight: 1.5, color: '#34d399' };
     }
 
-    if (isHintActive && name?.toLowerCase() === targetCountry?.toLowerCase()) {
-      return { ...baseStyle, fillColor: '#fbbf24', fillOpacity: 0.9, weight: 3, color: '#fef08a', className: 'leaflet-interactive pointer-events-auto animate-pulse' };
-    }
-
-    if (gameState === 'revealed' && name?.toLowerCase() === targetCountry?.toLowerCase()) {
+    if (gameState === 'gameover' && name?.toLowerCase() === targetCountry?.toLowerCase()) {
       return { ...baseStyle, fillColor: '#ef4444', fillOpacity: 0.9, weight: 2.5, color: '#fef08a' };
     }
 
@@ -661,7 +592,7 @@ export default function App() {
           {gameMode !== 'relax' && (
             <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
               <span className="text-[8px] text-slate-400 block font-semibold">TIME</span>
-              <span className={`text-xs font-bold ${timeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-sky-400'}`}>{isHintActive ? 'PAUSED' : `${timeLeft}s`}</span>
+              <span className={`text-xs font-bold ${timeLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-sky-400'}`}>{timeLeft}s</span>
             </div>
           )}
 
@@ -720,7 +651,7 @@ export default function App() {
                     L.DomEvent.stopPropagation(e);
                     L.DomEvent.preventDefault(e);
 
-                    if (gameState === 'revealed' || gameState === 'gameover' || gameState === 'victory') {
+                    if (gameState === 'gameover' || gameState === 'victory') {
                       return;
                     }
 
@@ -739,28 +670,6 @@ export default function App() {
           )}
           <MapFocusHandler gameMode={gameMode} continent={selectedContinentFilter} gameState={gameState} targetCenter={targetCenter} />
         </MapContainer>
-
-        {gameMode === 'relax' && gameState === 'playing' && (
-          <div className="absolute top-4 right-4 z-[950]">
-            <button 
-              onClick={() => setShowRelaxHintModal(true)} 
-              className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-sky-300 transition flex items-center gap-2 animate-pulse"
-            >
-              <span className="text-base">💡</span> Where is it? (Hint)
-            </button>
-          </div>
-        )}
-
-        {gameMode === 'challenge' && gameState === 'playing' && !isHintActive && (
-          <div className="absolute top-4 right-4 z-[950]">
-            <button 
-              onClick={() => setShowChallengeHintModal(true)} 
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl border border-amber-300 transition flex items-center gap-2 animate-pulse"
-            >
-              <span className="text-base">💡</span> Hint (Blink)
-            </button>
-          </div>
-        )}
 
         {gameState === 'gameover' && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
@@ -796,9 +705,6 @@ export default function App() {
                 />
                 <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
                   {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
-                </button>
-                <button onClick={() => setGameState('revealed')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 text-xs transition">
-                  SHOW LOCATION 📍
                 </button>
                 <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition">
                   PLAY AGAIN 🔄
@@ -862,69 +768,6 @@ export default function App() {
                 {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD +20 SEC ⏳'}
               </button>
             </div>
-          </div>
-        )}
-
-        {showRelaxHintModal && (
-          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
-              <button 
-                onClick={() => setShowRelaxHintModal(false)}
-                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
-              >
-                ✕
-              </button>
-
-              <div className="text-3xl mb-2">💡</div>
-              <h3 className="text-base font-black text-sky-400 mb-1">NEED A HINT?</h3>
-              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch a short ad to automatically select and zoom in on <strong className="text-yellow-400">{targetCountry}</strong>!
-              </p>
-
-              <button 
-                onClick={handleWatchRelaxHintAd}
-                disabled={isAdPlaying}
-                className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
-              >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SELECT COUNTRY 📍'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showChallengeHintModal && (
-          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
-              <button 
-                onClick={() => setShowChallengeHintModal(false)}
-                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
-              >
-                ✕
-              </button>
-
-              <div className="text-3xl mb-2">💡</div>
-              <h3 className="text-base font-black text-amber-400 mb-1">HINT (BLINK)</h3>
-              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch an ad to stop the timer and make <strong className="text-yellow-400">{targetCountry}</strong> blink on the map! <span className="text-amber-400 block mt-1">(0 points for this question)</span>
-              </p>
-
-              <button 
-                onClick={handleWatchChallengeHintAd}
-                disabled={isAdPlaying}
-                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
-              >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & SHOW HINT ✨'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {gameState === 'revealed' && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-slate-900/95 border border-slate-700 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md">
-            <span className="text-xs text-slate-300">Viewing location of <strong className="text-yellow-400">{targetCountry}</strong></span>
-            <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
-              Play Again 🔄
-            </button>
           </div>
         )}
 
