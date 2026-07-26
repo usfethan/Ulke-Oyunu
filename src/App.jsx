@@ -36,7 +36,7 @@ const CONTINENT_BOUNDS = {
 };
 
 const COUNTRY_DETAILS = {
-  // --- EUROPE (Türkiye dahil, Rusya ve İsrail hariç, KKTC güncellemeli) ---
+  // --- EUROPE ---
   "Russia": { code: "ru", capital: "Moscow", continent: "Asia & Middle East", tier: 1 },
   "France": { code: "fr", capital: "Paris", continent: "Europe", tier: 1 },
   "Germany": { code: "de", capital: "Berlin", continent: "Europe", tier: 1 },
@@ -76,7 +76,7 @@ const COUNTRY_DETAILS = {
   "Turkey": { code: "tr", capital: "Ankara", continent: "Europe", tier: 1 },
   "Montenegro": { code: "me", capital: "Podgorica", continent: "Europe", tier: 4 },
   "Malta": { code: "mt", capital: "Valletta", continent: "Europe", tier: 4 },
-  "Cyprus": { code: "cy", capital: "North Nicosia", continent: "Europe", tier: 4 }, // KKTC
+  "Cyprus": { code: "cy", capital: "North Nicosia", continent: "Europe", tier: 4 },
   "Andorra": { code: "ad", capital: "Andorra la Vella", continent: "Europe", tier: 4 },
   "Monaco": { code: "mc", capital: "Monaco", continent: "Europe", tier: 4 },
   "San Marino": { code: "sm", capital: "San Marino", continent: "Europe", tier: 4 },
@@ -126,7 +126,7 @@ const COUNTRY_DETAILS = {
   "Suriname": { code: "sr", capital: "Paramaribo", continent: "Americas", tier: 4 },
   "Trinidad and Tobago": { code: "tt", capital: "Port of Spain", continent: "Americas", tier: 4 },
 
-  // --- ASIA & MIDDLE EAST (Rusya dahil, İsrail hariç) ---
+  // --- ASIA & MIDDLE EAST ---
   "China": { code: "cn", capital: "Beijing", continent: "Asia & Middle East", tier: 1 },
   "Australia": { code: "au", capital: "Canberra", continent: "Asia & Middle East", tier: 1 },
   "India": { code: "in", capital: "New Delhi", continent: "Asia & Middle East", tier: 1 },
@@ -271,7 +271,6 @@ export default function App() {
 
   const [questionLives, setQuestionLives] = useState(3);
   const [timeLeft, setTimeLeft] = useState(20);
-  const [highlightedContinent, setHighlightedContinent] = useState(null);
   
   const [gameState, setGameState] = useState('playing'); 
   const [toastMessage, setToastMessage] = useState(null);
@@ -292,12 +291,36 @@ export default function App() {
     targetCountryRef.current = targetCountry;
   }, [targetCountry]);
 
+  // Robust Timer Effect
+  useEffect(() => {
+    if (gameState !== 'playing' || gameMode === 'relax') return;
+
+    if (timeLeft <= 0) {
+      playSound('wrong');
+      triggerHaptic('error');
+      setShowTimeUpModal(true);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, gameState, gameMode]);
+
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
       .then((res) => res.json())
       .then((data) => {
         if (data && data.features) {
-          const palestineTargets = ["israel", "west bank", "gaza strip", "gaza"];
+          const palestineTargets = ["west bank", "gaza strip", "gaza"];
           const palestineCoords = [];
           const otherFeatures = [];
 
@@ -430,7 +453,6 @@ export default function App() {
       setTimeLeft(20);
     }
 
-    setHighlightedContinent(null);
     setGameState('playing');
     setToastMessage(null);
   };
@@ -769,6 +791,83 @@ export default function App() {
           <MapFocusHandler gameMode={gameMode} continent={selectedContinentFilter} gameState={gameState} targetCenter={targetCenter} relaxedHintCenter={relaxedHintCenter} />
         </MapContainer>
 
+        {showAdModal && (
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl">
+              <div className="text-3xl mb-2">💔</div>
+              <h3 className="text-base font-black text-rose-400 mb-1">OUT OF LIVES!</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                Watch a short ad to get <strong className="text-amber-400">+2 Lives</strong> and keep your streak going!
+              </p>
+
+              <div className="flex flex-col gap-2.5">
+                <button 
+                  onClick={() => {
+                    setIsAdPlaying(true);
+                    setTimeout(() => {
+                      setIsAdPlaying(false);
+                      setShowAdModal(false);
+                      setQuestionLives(2);
+                    }, 1500);
+                  }}
+                  disabled={isAdPlaying}
+                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg transition"
+                >
+                  {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & CONTINUE 🎬'}
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowAdModal(false);
+                    setGameState('gameover');
+                  }}
+                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold rounded-xl text-xs border border-slate-700 transition"
+                >
+                  GIVE UP 🚪
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showTimeUpModal && (
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl">
+              <div className="text-3xl mb-2">⏳</div>
+              <h3 className="text-base font-black text-sky-400 mb-1">TIME'S UP!</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                You ran out of time for <strong className="text-yellow-400">{targetCountry}</strong>!
+              </p>
+
+              <div className="flex flex-col gap-2.5">
+                <button 
+                  onClick={() => {
+                    setIsAdPlaying(true);
+                    setTimeout(() => {
+                      setIsAdPlaying(false);
+                      setShowTimeUpModal(false);
+                      const calculatedTime = Math.max(7, 21 - level * 2);
+                      setTimeLeft(calculatedTime);
+                    }, 1500);
+                  }}
+                  disabled={isAdPlaying}
+                  className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg transition"
+                >
+                  {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD FOR +10s ⏱️'}
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowTimeUpModal(false);
+                    setGameState('gameover');
+                  }}
+                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold rounded-xl text-xs border border-slate-700 transition"
+                >
+                  GIVE UP 🚪
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showRelaxHintAdModal && (
           <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
             <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
@@ -802,6 +901,42 @@ export default function App() {
               >
                 {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & HIGHLIGHT 🔍'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'gameover' && (
+          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-5 w-full max-w-xs text-center shadow-2xl flex flex-col max-h-[85vh]">
+              <div className="text-3xl mb-1">💀</div>
+              <h3 className="text-base font-black text-rose-400 mb-0.5">GAME OVER</h3>
+              <p className="text-[11px] text-slate-300 mb-3">You ran out of lives / time!</p>
+              
+              <div className="bg-slate-950/60 p-3 rounded-2xl mb-3 border border-slate-800">
+                <span className="text-[8px] text-slate-400 block font-semibold">FINAL SCORE</span>
+                <span className="text-lg font-black text-amber-400">{score} PTS</span>
+              </div>
+
+              <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar pr-0.5">
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={playerNameInput}
+                  onChange={(e) => setPlayerNameInput(e.target.value)}
+                  maxLength={12}
+                  disabled={scoreSaved}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
+                />
+                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
+                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
+                </button>
+                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs transition">
+                  TRY AGAIN 🔄
+                </button>
+                <button onClick={() => setScreen('leaderboard')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-slate-700 transition">
+                  LEADERBOARD 👑
+                </button>
+              </div>
             </div>
           </div>
         )}
