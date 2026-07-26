@@ -214,20 +214,15 @@ export default function App() {
           clearInterval(timer);
           triggerHaptic('error');
           
-          // Can hakkı varsa Time's Up modalı aç, yoksa Can bitti modalı aç
-          if (questionLives > 1) {
-            setShowTimeUpModal(true);
-          } else {
-            setQuestionLives(0);
-            setShowAdModal(true);
-          }
+          // Süre bittiğinde Time's Up modalı açılır
+          setShowTimeUpModal(true);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintModal, questionLives]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintModal]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -430,7 +425,6 @@ export default function App() {
       setIsAdPlaying(false);
       setShowAdModal(false);
       setQuestionLives(3);
-      // Can bittiğinde reklam izlenince süre orijinal haline (20sn veya o level süresine) sıfırlanır
       const resetTime = gameMode === 'challenge' ? Math.max(7, 21 - level * 2) : 20;
       setTimeLeft(resetTime);
     }, 1500);
@@ -441,7 +435,6 @@ export default function App() {
     setTimeout(() => {
       setIsAdPlaying(false);
       setShowTimeUpModal(false);
-      // Süre bittiğinde reklam izlenince +20 sn eklenir
       setTimeLeft((prev) => prev + 20);
     }, 1500);
   };
@@ -454,16 +447,8 @@ export default function App() {
 
   const handleCloseTimeUpModal = () => {
     setShowTimeUpModal(false);
-    // Reklam izlemezse 1 canı gider, süresi 10 saniye yenilenir ve devam eder
-    setQuestionLives((prev) => {
-      const next = prev - 1;
-      if (next <= 0) {
-        setShowAdModal(true);
-        return 0;
-      }
-      return next;
-    });
-    setTimeLeft(10);
+    setGameState('gameover');
+    setScoreSaved(false);
   };
 
   const handleWatchRelaxHintAd = () => {
