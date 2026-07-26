@@ -36,62 +36,91 @@ const CONTINENT_BOUNDS = {
 };
 
 const COUNTRY_DETAILS = {
-  "United States": { code: "us", capital: "Washington, D.C.", continent: "Americas", tier: 1 },
-  "Canada": { code: "ca", capital: "Ottawa", continent: "Americas", tier: 1 },
-  "Brazil": { code: "br", capital: "Brasília", continent: "Americas", tier: 1 },
-  "China": { code: "cn", capital: "Beijing", continent: "Asia & Middle East", tier: 1 },
+  // --- EUROPE ---
   "Russia": { code: "ru", capital: "Moscow", continent: "Europe", tier: 1 },
-  "Australia": { code: "au", capital: "Canberra", continent: "Asia & Middle East", tier: 1 },
-  "India": { code: "in", capital: "New Delhi", continent: "Asia & Middle East", tier: 1 },
   "France": { code: "fr", capital: "Paris", continent: "Europe", tier: 1 },
   "Germany": { code: "de", capital: "Berlin", continent: "Europe", tier: 1 },
   "Italy": { code: "it", capital: "Rome", continent: "Europe", tier: 1 },
   "United Kingdom": { code: "gb", capital: "London", continent: "Europe", tier: 1 },
-  "Japan": { code: "jp", capital: "Tokyo", continent: "Asia & Middle East", tier: 1 },
-  "Egypt": { code: "eg", capital: "Cairo", continent: "Africa", tier: 1 },
-  "Turkey": { code: "tr", capital: "Ankara", continent: "Asia & Middle East", tier: 1 },
-  "Argentina": { code: "ar", capital: "Buenos Aires", continent: "Americas", tier: 1 },
   "Spain": { code: "es", capital: "Madrid", continent: "Europe", tier: 2 },
-  "Mexico": { code: "mx", capital: "Mexico City", continent: "Americas", tier: 2 },
-  "South Africa": { code: "za", capital: "Pretoria", continent: "Africa", tier: 2 },
-  "Saudi Arabia": { code: "sa", capital: "Riyadh", continent: "Asia & Middle East", tier: 2 },
-  "Colombia": { code: "co", capital: "Bogotá", continent: "Americas", tier: 2 },
   "Sweden": { code: "se", capital: "Stockholm", continent: "Europe", tier: 2 },
   "Norway": { code: "no", capital: "Oslo", continent: "Europe", tier: 2 },
   "Poland": { code: "pl", capital: "Warsaw", continent: "Europe", tier: 2 },
   "Ukraine": { code: "ua", capital: "Kyiv", continent: "Europe", tier: 2 },
-  "Iran": { code: "ir", capital: "Tehran", continent: "Asia & Middle East", tier: 2 },
-  "South Korea": { code: "kr", capital: "Seoul", continent: "Asia & Middle East", tier: 2 },
-  "Indonesia": { code: "id", capital: "Jakarta", continent: "Asia & Middle East", tier: 2 },
-  "Thailand": { code: "th", capital: "Bangkok", continent: "Asia & Middle East", tier: 2 },
-  "Nigeria": { code: "ng", capital: "Abuja", continent: "Africa", tier: 2 },
-  "Algeria": { code: "dz", capital: "Algiers", continent: "Africa", tier: 2 },
-  "Chile": { code: "cl", capital: "Santiago", continent: "Americas", tier: 2 },
-  "Palestine": { code: "ps", capital: "Jerusalem", continent: "Asia & Middle East", tier: 3 },
-  "Nicaragua": { code: "ni", capital: "Managua", continent: "Americas", tier: 3 },
-  "Peru": { code: "pe", capital: "Lima", continent: "Americas", tier: 3 },
-  "Venezuela": { code: "ve", capital: "Caracas", continent: "Americas", tier: 3 },
-  "Ecuador": { code: "ec", capital: "Quito", continent: "Americas", tier: 3 },
   "Finland": { code: "fi", capital: "Helsinki", continent: "Europe", tier: 3 },
   "Greece": { code: "gr", capital: "Athens", continent: "Europe", tier: 3 },
   "Portugal": { code: "pt", capital: "Lisbon", continent: "Europe", tier: 3 },
   "Ireland": { code: "ie", capital: "Dublin", continent: "Europe", tier: 3 },
   "Romania": { code: "ro", capital: "Bucharest", continent: "Europe", tier: 3 },
+  "Netherlands": { code: "nl", capital: "Amsterdam", continent: "Europe", tier: 2 },
+  "Belgium": { code: "be", capital: "Brussels", continent: "Europe", tier: 2 },
+  "Switzerland": { code: "ch", capital: "Bern", continent: "Europe", tier: 2 },
+  "Austria": { code: "at", capital: "Vienna", continent: "Europe", tier: 2 },
+  "Denmark": { code: "dk", capital: "Copenhagen", continent: "Europe", tier: 2 },
+  "Hungary": { code: "hu", capital: "Budapest", continent: "Europe", tier: 3 },
+  "Czech Republic": { code: "cz", capital: "Prague", continent: "Europe", tier: 3 },
+  "Serbia": { code: "rs", capital: "Belgrade", continent: "Europe", tier: 3 },
+  "Bulgaria": { code: "bg", capital: "Sofia", continent: "Europe", tier: 3 },
+  "Slovakia": { code: "sk", capital: "Bratislava", continent: "Europe", tier: 3 },
+  "Croatia": { code: "hr", capital: "Zagreb", continent: "Europe", tier: 3 },
+  "Albania": { code: "al", capital: "Tirana", continent: "Europe", tier: 4 },
+  "Lithuania": { code: "lt", capital: "Vilnius", continent: "Europe", tier: 4 },
+  "Latvia": { code: "lv", capital: "Riga", continent: "Europe", tier: 4 },
+  "Estonia": { code: "ee", capital: "Tallinn", continent: "Europe", tier: 4 },
+  "Slovenia": { code: "si", capital: "Ljubljana", continent: "Europe", tier: 4 },
+  "Bosnia and Herzegovina": { code: "ba", capital: "Sarajevo", continent: "Europe", tier: 4 },
+  "Macedonia": { code: "mk", capital: "Skopje", continent: "Europe", tier: 4 },
+  "Moldova": { code: "md", capital: "Chisinau", continent: "Europe", tier: 4 },
+  "Belarus": { code: "by", capital: "Minsk", continent: "Europe", tier: 3 },
+  "Iceland": { code: "is", capital: "Reykjavik", continent: "Europe", tier: 4 },
+  "Ireland": { code: "ie", capital: "Dublin", continent: "Europe", tier: 3 },
+
+  // --- AMERICAS ---
+  "United States": { code: "us", capital: "Washington, D.C.", continent: "Americas", tier: 1 },
+  "Canada": { code: "ca", capital: "Ottawa", continent: "Americas", tier: 1 },
+  "Brazil": { code: "br", capital: "Brasília", continent: "Americas", tier: 1 },
+  "Argentina": { code: "ar", capital: "Buenos Aires", continent: "Americas", tier: 1 },
+  "Mexico": { code: "mx", capital: "Mexico City", continent: "Americas", tier: 2 },
+  "Colombia": { code: "co", capital: "Bogotá", continent: "Americas", tier: 2 },
+  "Chile": { code: "cl", capital: "Santiago", continent: "Americas", tier: 2 },
+  "Nicaragua": { code: "ni", capital: "Managua", continent: "Americas", tier: 3 },
+  "Peru": { code: "pe", capital: "Lima", continent: "Americas", tier: 3 },
+  "Venezuela": { code: "ve", capital: "Caracas", continent: "Americas", tier: 3 },
+  "Ecuador": { code: "ec", capital: "Quito", continent: "Americas", tier: 3 },
+  "Bolivia": { code: "bo", capital: "Sucre", continent: "Americas", tier: 4 },
+  "Paraguay": { code: "py", capital: "Asunción", continent: "Americas", tier: 4 },
+  "Uruguay": { code: "uy", capital: "Montevideo", continent: "Americas", tier: 4 },
+
+  // --- ASIA & MIDDLE EAST ---
+  "China": { code: "cn", capital: "Beijing", continent: "Asia & Middle East", tier: 1 },
+  "Australia": { code: "au", capital: "Canberra", continent: "Asia & Middle East", tier: 1 },
+  "India": { code: "in", capital: "New Delhi", continent: "Asia & Middle East", tier: 1 },
+  "Japan": { code: "jp", capital: "Tokyo", continent: "Asia & Middle East", tier: 1 },
+  "Turkey": { code: "tr", capital: "Ankara", continent: "Asia & Middle East", tier: 1 },
+  "Saudi Arabia": { code: "sa", capital: "Riyadh", continent: "Asia & Middle East", tier: 2 },
+  "Iran": { code: "ir", capital: "Tehran", continent: "Asia & Middle East", tier: 2 },
+  "South Korea": { code: "kr", capital: "Seoul", continent: "Asia & Middle East", tier: 2 },
+  "Indonesia": { code: "id", capital: "Jakarta", continent: "Asia & Middle East", tier: 2 },
+  "Thailand": { code: "th", capital: "Bangkok", continent: "Asia & Middle East", tier: 2 },
+  "Palestine": { code: "ps", capital: "Jerusalem", continent: "Asia & Middle East", tier: 3 },
   "Vietnam": { code: "vn", capital: "Hanoi", continent: "Asia & Middle East", tier: 3 },
   "Philippines": { code: "ph", capital: "Manila", continent: "Asia & Middle East", tier: 3 },
   "Pakistan": { code: "pk", capital: "Islamabad", continent: "Asia & Middle East", tier: 3 },
   "Kazakhstan": { code: "kz", capital: "Astana", continent: "Asia & Middle East", tier: 3 },
   "Iraq": { code: "iq", capital: "Baghdad", continent: "Asia & Middle East", tier: 3 },
-  "Morocco": { code: "ma", capital: "Rabat", continent: "Africa", tier: 3 },
-  "Kenya": { code: "ke", capital: "Nairobi", continent: "Africa", tier: 3 },
-  "Ethiopia": { code: "et", capital: "Addis Ababa", continent: "Africa", tier: 3 },
   "New Zealand": { code: "nz", capital: "Wellington", continent: "Asia & Middle East", tier: 3 },
-  "Bolivia": { code: "bo", capital: "Sucre", continent: "Americas", tier: 4 },
-  "Paraguay": { code: "py", capital: "Asunción", continent: "Americas", tier: 4 },
-  "Uruguay": { code: "uy", capital: "Montevideo", continent: "Americas", tier: 4 },
   "Jordan": { code: "jo", capital: "Amman", continent: "Asia & Middle East", tier: 4 },
   "Lebanon": { code: "lb", capital: "Beirut", continent: "Asia & Middle East", tier: 4 },
-  "Syria": { code: "sy", capital: "Damascus", continent: "Asia & Middle East", tier: 4 }
+  "Syria": { code: "sy", capital: "Damascus", continent: "Asia & Middle East", tier: 4 },
+
+  // --- AFRICA ---
+  "Egypt": { code: "eg", capital: "Cairo", continent: "Africa", tier: 1 },
+  "South Africa": { code: "za", capital: "Pretoria", continent: "Africa", tier: 2 },
+  "Nigeria": { code: "ng", capital: "Abuja", continent: "Africa", tier: 2 },
+  "Algeria": { code: "dz", capital: "Algiers", continent: "Africa", tier: 2 },
+  "Morocco": { code: "ma", capital: "Rabat", continent: "Africa", tier: 3 },
+  "Kenya": { code: "ke", capital: "Nairobi", continent: "Africa", tier: 3 },
+  "Ethiopia": { code: "et", capital: "Addis Ababa", continent: "Africa", tier: 3 }
 };
 
 const getCountryCode = (name) => COUNTRY_DETAILS[name]?.code || null;
@@ -210,22 +239,6 @@ export default function App() {
       .catch((err) => console.error('Map Load Error:', err));
   }, []);
 
-  useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal || showRelaxHintAdModal) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          triggerHaptic('error');
-          setShowTimeUpModal(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintAdModal]);
-
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
     const newEntry = { name: playerNameInput.trim().slice(0, 12), score, level };
@@ -335,23 +348,31 @@ export default function App() {
     triggerHaptic('success');
 
     const countryName = countryFeature.properties.name;
-    const ptsEarned = (gameMode === 'relax' ? 10 : (questionLives * 10));
-    const newScore = score + ptsEarned;
-    
+    const totalCount = getTotalCountForMode();
     const nextCorrectCount = Object.keys(correctCountries).length + 1;
-    const newLevel = Math.floor(nextCorrectCount / 5) + 1;
-
-    setScore(newScore);
     
-    if (newLevel > level && gameMode === 'challenge') {
-      setQuestionLives(3);
-    }
-    
-    setLevel(newLevel);
+    let ptsEarned = 0;
+    let newScore = score;
+    let newLevel = level;
 
-    if (newScore > highScore) {
-      setHighScore(newScore);
-      localStorage.setItem('geo_high_score', newScore.toString());
+    if (gameMode === 'relax') {
+      newScore = Math.round((nextCorrectCount / totalCount) * 100); 
+      setScore(newScore);
+    } else {
+      ptsEarned = (questionLives * 10);
+      newScore = score + ptsEarned;
+      newLevel = Math.floor(nextCorrectCount / 5) + 1;
+      setScore(newScore);
+      
+      if (newLevel > level && gameMode === 'challenge') {
+        setQuestionLives(3);
+      }
+      setLevel(newLevel);
+
+      if (newScore > highScore) {
+        setHighScore(newScore);
+        localStorage.setItem('geo_high_score', newScore.toString());
+      }
     }
 
     let centerPoint = targetCenter;
@@ -385,15 +406,17 @@ export default function App() {
       markersRef.current.push(marker);
     }
 
-    const totalCount = getTotalCountForMode();
-
     if (nextCorrectCount >= totalCount) {
       setGameState('victory');
       setScoreSaved(false);
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
     } else {
-      const levelUpText = (newLevel > level && gameMode === 'challenge') ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
-      setToastMessage(`🎉 Correct! +${ptsEarned} pts${levelUpText}`);
+      if (gameMode === 'relax') {
+        setToastMessage(`🎉 Correct! (${newScore}%)`);
+      } else {
+        const levelUpText = (newLevel > level && gameMode === 'challenge') ? ` 🚀 LEVEL UP! (+3 Lives)` : '';
+        setToastMessage(`🎉 Correct! +${ptsEarned} pts${levelUpText}`);
+      }
       confetti({ particleCount: 40, spread: 40, origin: { y: 0.7 } });
       
       setTimeout(() => {
@@ -425,50 +448,6 @@ export default function App() {
     });
   };
 
-  const handleWatchAd = () => {
-    setIsAdPlaying(true);
-    setTimeout(() => {
-      setIsAdPlaying(false);
-      setShowAdModal(false);
-      setQuestionLives(3);
-      const resetTime = gameMode === 'challenge' ? Math.max(7, 21 - level * 2) : 20;
-      setTimeLeft(resetTime);
-    }, 1500);
-  };
-
-  const handleWatchTimeUpAd = () => {
-    setIsAdPlaying(true);
-    setTimeout(() => {
-      setIsAdPlaying(false);
-      setShowTimeUpModal(false);
-      setTimeLeft((prev) => prev + 20);
-    }, 1500);
-  };
-
-  const handleWatchRelaxHintAd = () => {
-    setIsAdPlaying(true);
-    setTimeout(() => {
-      setIsAdPlaying(false);
-      setShowRelaxHintAdModal(false);
-      setIsHintActive(true);
-      if (targetCenter) {
-        setRelaxedHintCenter(targetCenter);
-      }
-    }, 1500);
-  };
-
-  const handleCloseAdModal = () => {
-    setShowAdModal(false);
-    setGameState('gameover');
-    setScoreSaved(false);
-  };
-
-  const handleCloseTimeUpModal = () => {
-    setShowTimeUpModal(false);
-    setGameState('gameover');
-    setScoreSaved(false);
-  };
-
   const getCountryStyle = (feature) => {
     const name = feature.properties.name;
     const details = COUNTRY_DETAILS[name];
@@ -490,14 +469,6 @@ export default function App() {
 
     if (gameMode === 'relax' && isHintActive && name?.toLowerCase() === targetCountry?.toLowerCase()) {
       return { ...baseStyle, fillColor: '#f59e0b', fillOpacity: 0.9, weight: 3, color: '#fef08a' };
-    }
-
-    if (highlightedContinent) {
-      if (details && details.continent === highlightedContinent) {
-        return { ...baseStyle, fillColor: '#0284c7', fillOpacity: 0.5, weight: 2, color: '#38bdf8' };
-      } else {
-        return { ...baseStyle, fillColor: '#0f172a', fillOpacity: 0.1, weight: 0.5, color: '#334155' };
-      }
     }
 
     return { ...baseStyle, fillColor: '#1e293b' };
@@ -635,8 +606,8 @@ export default function App() {
           </div>
 
           <div className="bg-slate-800 px-1.5 py-1 rounded-xl border border-slate-700 text-center shrink-0">
-            <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
-            <span className="text-xs font-bold text-emerald-400">{score}</span>
+            <span className="text-[8px] text-slate-400 block font-semibold">{gameMode === 'relax' ? 'PROGRESS' : 'SCORE'}</span>
+            <span className="text-xs font-bold text-emerald-400">{score}{gameMode === 'relax' ? '%' : ''}</span>
           </div>
 
           {gameMode === 'relax' && (
@@ -706,106 +677,6 @@ export default function App() {
           <MapFocusHandler gameMode={gameMode} continent={selectedContinentFilter} gameState={gameState} targetCenter={targetCenter} relaxedHintCenter={relaxedHintCenter} />
         </MapContainer>
 
-        {gameState === 'gameover' && (
-          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-rose-500/45 rounded-3xl p-5 w-full max-w-xs text-center shadow-2xl flex flex-col max-h-[85vh]">
-              <div className="text-3xl mb-1">💔</div>
-              <h3 className="text-base font-black text-rose-400 mb-0.5">GAME OVER</h3>
-              <p className="text-[11px] text-slate-300 mb-3">Target was <span className="font-bold text-yellow-400">{targetCountry}</span></p>
-              
-              <div className="grid grid-cols-3 gap-2 bg-slate-950/60 p-2.5 rounded-2xl mb-3 border border-slate-800">
-                <div>
-                  <span className="text-[8px] text-slate-400 block font-semibold">SCORE</span>
-                  <span className="text-xs font-black text-emerald-400">{score}</span>
-                </div>
-                <div>
-                  <span className="text-[8px] text-slate-400 block font-semibold">LEVEL</span>
-                  <span className="text-xs font-black text-amber-400">{level}</span>
-                </div>
-                <div>
-                  <span className="text-[8px] text-slate-400 block font-semibold">BEST</span>
-                  <span className="text-xs font-black text-sky-400">{highScore}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar pr-0.5">
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  value={playerNameInput}
-                  onChange={(e) => setPlayerNameInput(e.target.value)}
-                  maxLength={12}
-                  disabled={scoreSaved}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
-                />
-                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
-                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
-                </button>
-                <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition">
-                  PLAY AGAIN 🔄
-                </button>
-                <button onClick={() => setScreen('leaderboard')} className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs border border-slate-700 transition">
-                  LEADERBOARD 👑
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showAdModal && (
-          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
-              <button 
-                onClick={handleCloseAdModal}
-                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
-              >
-                ✕
-              </button>
-
-              <div className="text-3xl mb-2">🎬</div>
-              <h3 className="text-base font-black text-emerald-400 mb-1">CONTINUE GAME?</h3>
-              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch an ad to get <strong className="text-emerald-400">+3 Lives & Full Timer</strong> to keep your score going!
-              </p>
-
-              <button 
-                onClick={handleWatchAd}
-                disabled={isAdPlaying}
-                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
-              >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & FULLY REFILL 🚀'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showTimeUpModal && (
-          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
-              <button 
-                onClick={handleCloseTimeUpModal}
-                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
-              >
-                ✕
-              </button>
-
-              <div className="text-3xl mb-2">⏰</div>
-              <h3 className="text-base font-black text-sky-400 mb-1">TIME'S UP!</h3>
-              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch a short ad to get <strong className="text-sky-400">+20 sec</strong> extra time!
-              </p>
-
-              <button 
-                onClick={handleWatchTimeUpAd}
-                disabled={isAdPlaying}
-                className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
-              >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD +20 SEC ⏳'}
-              </button>
-            </div>
-          </div>
-        )}
-
         {showRelaxHintAdModal && (
           <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
             <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
@@ -823,7 +694,17 @@ export default function App() {
               </p>
 
               <button 
-                onClick={handleWatchRelaxHintAd}
+                onClick={() => {
+                  setIsAdPlaying(true);
+                  setTimeout(() => {
+                    setIsAdPlaying(false);
+                    setShowRelaxHintAdModal(false);
+                    setIsHintActive(true);
+                    if (targetCenter) {
+                      setRelaxedHintCenter(targetCenter);
+                    }
+                  }, 1500);
+                }}
                 disabled={isAdPlaying}
                 className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
@@ -838,26 +719,30 @@ export default function App() {
             <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-5 w-full max-w-xs text-center shadow-2xl flex flex-col max-h-[85vh]">
               <div className="text-3xl mb-1">👑</div>
               <h3 className="text-base font-black text-amber-400 mb-0.5">VICTORY!</h3>
-              <p className="text-[11px] text-slate-300 mb-3">You completed the map!</p>
+              <p className="text-[11px] text-slate-300 mb-3">{gameMode === 'relax' ? `You completed ${selectedContinentFilter} (%100)!` : 'You completed the map!'}</p>
               
               <div className="bg-slate-950/60 p-3 rounded-2xl mb-3 border border-slate-800">
-                <span className="text-[8px] text-slate-400 block font-semibold">TOTAL SCORE</span>
-                <span className="text-lg font-black text-emerald-400">{score} PTS</span>
+                <span className="text-[8px] text-slate-400 block font-semibold">{gameMode === 'relax' ? 'COMPLETION' : 'TOTAL SCORE'}</span>
+                <span className="text-lg font-black text-emerald-400">{gameMode === 'relax' ? '100%' : `${score} PTS`}</span>
               </div>
 
               <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar pr-0.5">
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  value={playerNameInput}
-                  onChange={(e) => setPlayerNameInput(e.target.value)}
-                  maxLength={12}
-                  disabled={scoreSaved}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
-                />
-                <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
-                  {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
-                </button>
+                {gameMode !== 'relax' && (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={playerNameInput}
+                      onChange={(e) => setPlayerNameInput(e.target.value)}
+                      maxLength={12}
+                      disabled={scoreSaved}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-400"
+                    />
+                    <button onClick={saveScoreToLeaderboard} disabled={scoreSaved || !playerNameInput.trim()} className="w-full py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs transition">
+                      {scoreSaved ? 'SAVED ✓' : 'SAVE SCORE 🥇'}
+                    </button>
+                  </>
+                )}
                 <button onClick={() => { setScoreSaved(false); setPlayerNameInput(''); startGame(gameMode, selectedContinentFilter); }} className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs transition">
                   PLAY AGAIN 🔄
                 </button>
