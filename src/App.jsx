@@ -155,6 +155,7 @@ export default function App() {
 
   const [isAdPlaying, setIsAdPlaying] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
+  const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showRelaxHintModal, setShowRelaxHintModal] = useState(false);
 
   const askedCountriesRef = useRef([]);
@@ -206,20 +207,27 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showRelaxHintModal) return;
+    if (screen !== 'game' || gameState !== 'playing' || !targetCountry || gameMode === 'relax' || isAdPlaying || showAdModal || showTimeUpModal || showRelaxHintModal) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           triggerHaptic('error');
-          setShowAdModal(true);
+          
+          // Can hakkı varsa Time's Up modalı aç, yoksa Can bitti modalı aç
+          if (questionLives > 1) {
+            setShowTimeUpModal(true);
+          } else {
+            setQuestionLives(0);
+            setShowAdModal(true);
+          }
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showRelaxHintModal]);
+  }, [screen, gameState, targetCountry, gameMode, isAdPlaying, showAdModal, showTimeUpModal, showRelaxHintModal, questionLives]);
 
   const saveScoreToLeaderboard = () => {
     if (!playerNameInput.trim() || scoreSaved) return;
@@ -254,6 +262,7 @@ export default function App() {
     setCorrectCountries({}); 
     setScoreSaved(false);
     setShowAdModal(false);
+    setShowTimeUpModal(false);
     setShowRelaxHintModal(false);
     askedCountriesRef.current = []; 
     setQuestionLives(3);
@@ -421,7 +430,40 @@ export default function App() {
       setIsAdPlaying(false);
       setShowAdModal(false);
       setQuestionLives(3);
+      // Can bittiğinde reklam izlenince süre orijinal haline (20sn veya o level süresine) sıfırlanır
+      const resetTime = gameMode === 'challenge' ? Math.max(7, 21 - level * 2) : 20;
+      setTimeLeft(resetTime);
     }, 1500);
+  };
+
+  const handleWatchTimeUpAd = () => {
+    setIsAdPlaying(true);
+    setTimeout(() => {
+      setIsAdPlaying(false);
+      setShowTimeUpModal(false);
+      // Süre bittiğinde reklam izlenince +20 sn eklenir
+      setTimeLeft((prev) => prev + 20);
+    }, 1500);
+  };
+
+  const handleCloseAdModal = () => {
+    setShowAdModal(false);
+    setGameState('gameover');
+    setScoreSaved(false);
+  };
+
+  const handleCloseTimeUpModal = () => {
+    setShowTimeUpModal(false);
+    // Reklam izlemezse 1 canı gider, süresi 10 saniye yenilenir ve devam eder
+    setQuestionLives((prev) => {
+      const next = prev - 1;
+      if (next <= 0) {
+        setShowAdModal(true);
+        return 0;
+      }
+      return next;
+    });
+    setTimeLeft(10);
   };
 
   const handleWatchRelaxHintAd = () => {
@@ -452,12 +494,6 @@ export default function App() {
       setToastMessage(`💡 ${targetCountry} selected and shown!`);
       setTimeout(() => setToastMessage(null), 2000);
     }, 1500);
-  };
-
-  const handleCloseAdModal = () => {
-    setShowAdModal(false);
-    setGameState('gameover');
-    setScoreSaved(false);
   };
 
   const getCountryStyle = (feature) => {
@@ -753,7 +789,7 @@ export default function App() {
               <div className="text-3xl mb-2">🎬</div>
               <h3 className="text-base font-black text-emerald-400 mb-1">CONTINUE GAME?</h3>
               <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
-                Watch a short ad to get <strong className="text-emerald-400">+3 Lives</strong> and keep your score and level going!
+                Watch an ad to get <strong className="text-emerald-400">+3 Lives & Full Timer</strong> to keep your score going!
               </p>
 
               <button 
@@ -761,7 +797,34 @@ export default function App() {
                 disabled={isAdPlaying}
                 className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
               >
-                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & GET +3 LIVES 🚀'}
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD & FULLY REFILL 🚀'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showTimeUpModal && (
+          <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl relative">
+              <button 
+                onClick={handleCloseTimeUpModal}
+                className="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-300 w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+
+              <div className="text-3xl mb-2">⏰</div>
+              <h3 className="text-base font-black text-sky-400 mb-1">TIME'S UP!</h3>
+              <p className="text-[11px] text-slate-300 mb-5 leading-relaxed">
+                Watch a short ad to get <strong className="text-sky-400">+20 sec</strong> extra time!
+              </p>
+
+              <button 
+                onClick={handleWatchTimeUpAd}
+                disabled={isAdPlaying}
+                className="w-full py-3 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
+              >
+                {isAdPlaying ? 'PLAYING AD...' : 'WATCH AD +20 SEC ⏳'}
               </button>
             </div>
           </div>
